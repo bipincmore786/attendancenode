@@ -85,15 +85,18 @@ export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gray-100">
       <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-center  text-[#000000]">User Info Form</h1>
+        <h1 className="text-2xl font-bold mb-4 text-center  text-[#000000]">Visitor Form</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 ">Name</label>
             <input
               type="text"
               value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md mt-1  text-[#000000]"
+              onChange={(e) => {
+                setUserName(e.target.value)
+
+              }}
+              className="w-full p-2 border border-gray-300 rounded-md mt-1 text-[#000000]"
               required
             />
           </div>
@@ -101,8 +104,14 @@ export default function HomePage() {
             <label className="block text-sm font-medium text-gray-700">Phone Number</label>
             <input
               type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={(e) => {
+                //  setPhoneNumber(e.target.value) 
+                const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                setPhoneNumber(onlyNums);
+              }}
               className="w-full p-2 border border-gray-300 rounded-md mt-1 text-[#000000]"
               required
               maxLength={10}
@@ -128,10 +137,14 @@ export default function HomePage() {
 
         {token && (
           <div className="mt-6 text-center">
-            <p className="text-lg font-semibold text-green-700">Generated Token: {token}</p>
+            {/* <p className="text-lg font-semibold text-green-700">Your token number is : {token}</p> */}
+            <h2 className="text-xl font-semibold  text-[#000000]">Your token number is : {token}</h2>
+            <p className="text-sm text-gray-500 mt-1  text-[#000000]">
+              Please share this token at the check-in desk.
+            </p>
             {location && (
-              <p className="text-sm text-gray-700 mt-2">
-                Location: Lat {location.latitude.toFixed(5)}, Lng {location.longitude.toFixed(5)}
+              <p className="text-sm text-gray-700 mt-2 ">
+                Location: Lat <span className='text-[#00563F]'>{location.latitude.toFixed(5)}</span>, Lng  <span className='text-[#00563F]'>{location.longitude.toFixed(5)}</span>
               </p>
             )}
           </div>
