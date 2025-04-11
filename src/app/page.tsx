@@ -115,9 +115,15 @@ export default function HomePage() {
             Submit
           </button>
         </form>
-        {loading && (
+        {/* {loading && (
           <p className="text-center text-gray-600 mt-4">Fetching location...</p>
+        )} */}
+        {loading && (
+          <div className="flex justify-center my-4">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+          </div>
         )}
+
         {token && (
           <div className="mt-6 text-center">
             <p className="text-lg font-semibold text-green-700">Generated Token: {token}</p>
