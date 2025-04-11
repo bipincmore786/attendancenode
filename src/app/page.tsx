@@ -113,7 +113,7 @@ export default function HomePage() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
           >
-            {loading ? 'Loading...' : 'Submit'}
+            {loading ? 'Please wait...' : 'Submit'}
           </button>
         </form>
         {/* {loading && (
