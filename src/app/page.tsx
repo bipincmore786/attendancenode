@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 export default function HomePage() {
   const [userName, setUserName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
 
@@ -29,6 +29,11 @@ export default function HomePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Clear form fields
+    // setUserName('');
+    // setPhoneNumber('');
+    setToken('')
+    setLocation(null)
 
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser.');
@@ -37,21 +42,21 @@ export default function HomePage() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
-        const generated = generateToken(userName, phoneNumber);
-        setToken(generated);
+        const tokenValue = generateToken(userName, phoneNumber);
+        setToken(tokenValue);
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
 
-        console.log(location, error)
-        alert(
-          `User Name: ${userName}\nPhone Number: ${phoneNumber}\nLatitude: ${latitude}\nLongitude: ${longitude}`
-        );
-        console.log(latitude, longitude)
+
       },
-      (error) => {
-        alert('Location access denied. Please allow location access to continue.' + error);
+      () => {
+        alert('Location permission denied. Cannot generate token.');
       }
     );
   };
+
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -62,8 +67,8 @@ export default function HomePage() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
         });
       },
       (err) => {
@@ -106,9 +111,14 @@ export default function HomePage() {
           </button>
         </form>
         {token && (
-          <p className="mt-4 text-center text-green-600 font-semibold">
-            Your 6-digit Token: {token}
-          </p>
+          <div className="mt-6 text-center">
+            <p className="text-lg font-semibold text-green-700">Generated Token: {token}</p>
+            {location && (
+              <p className="text-sm text-gray-700 mt-2">
+                Location: Lat {location.latitude.toFixed(5)}, Lng {location.longitude.toFixed(5)}
+              </p>
+            )}
+          </div>
         )}
       </div>
     </main>
