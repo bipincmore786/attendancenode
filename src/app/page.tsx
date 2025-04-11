@@ -8,6 +8,8 @@ export default function HomePage() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
+  const [loading, setLoading] = useState(false);
+
 
   const generateToken = (userName: string, phoneNumber: string): string => {
     const timestamp = Date.now().toString(); // Current time in milliseconds
@@ -32,6 +34,7 @@ export default function HomePage() {
     // Clear form fields
     // setUserName('');
     // setPhoneNumber('');
+    setLoading(true); // Start loading
     console.log(error)
     setToken('')
     setLocation(null)
@@ -49,11 +52,12 @@ export default function HomePage() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
-
+        setLoading(false); // Stop loading
 
       },
       () => {
         alert('Location permission denied. Cannot generate token.');
+        setLoading(false); // Stop loading
       }
     );
   };
