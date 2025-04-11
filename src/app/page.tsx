@@ -115,6 +115,9 @@ export default function HomePage() {
             Submit
           </button>
         </form>
+        {loading && (
+          <p className="text-center text-gray-600 mt-4">Fetching location...</p>
+        )}
         {token && (
           <div className="mt-6 text-center">
             <p className="text-lg font-semibold text-green-700">Generated Token: {token}</p>
