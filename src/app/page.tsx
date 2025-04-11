@@ -110,9 +110,10 @@ export default function HomePage() {
           </div>
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700"
           >
-            Submit
+            {loading ? 'Loading...' : 'Submit'}
           </button>
         </form>
         {/* {loading && (
@@ -120,8 +121,9 @@ export default function HomePage() {
         )} */}
         {loading && (
           <div className="flex justify-center my-4">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-500 border-t-transparent"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent shadow-lg"></div>
           </div>
+
         )}
 
         {token && (
