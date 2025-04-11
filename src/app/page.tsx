@@ -32,6 +32,7 @@ export default function HomePage() {
     // Clear form fields
     // setUserName('');
     // setPhoneNumber('');
+    console.log(error)
     setToken('')
     setLocation(null)
 
