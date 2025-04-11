@@ -9,16 +9,23 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
 
-  const generateToken = (name: string, phone: string): string => {
-    const seed = name + phone;
+  const generateToken = (userName: string, phoneNumber: string): string => {
+    const timestamp = Date.now().toString(); // Current time in milliseconds
+    const seed = userName + phoneNumber + timestamp;
+  
     let hash = 0;
     for (let i = 0; i < seed.length; i++) {
       hash = (hash << 5) - hash + seed.charCodeAt(i);
-      hash |= 0; // Convert to 32bit integer
+      hash |= 0; // Convert to 32-bit integer
     }
+  
+    // Convert to positive number and format to 6 digits
     const numericToken = Math.abs(hash % 1000000).toString().padStart(6, '0');
     return numericToken;
   };
+  
+  
+  
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
