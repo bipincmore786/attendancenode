@@ -12,20 +12,20 @@ export default function HomePage() {
   const generateToken = (userName: string, phoneNumber: string): string => {
     const timestamp = Date.now().toString(); // Current time in milliseconds
     const seed = userName + phoneNumber + timestamp;
-  
+
     let hash = 0;
     for (let i = 0; i < seed.length; i++) {
       hash = (hash << 5) - hash + seed.charCodeAt(i);
       hash |= 0; // Convert to 32-bit integer
     }
-  
+
     // Convert to positive number and format to 6 digits
     const numericToken = Math.abs(hash % 1000000).toString().padStart(6, '0');
     return numericToken;
   };
-  
-  
-  
+
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +41,14 @@ export default function HomePage() {
         const generated = generateToken(userName, phoneNumber);
         setToken(generated);
 
+        console.log(location, error)
         alert(
           `User Name: ${userName}\nPhone Number: ${phoneNumber}\nLatitude: ${latitude}\nLongitude: ${longitude}`
         );
         console.log(latitude, longitude)
       },
       (error) => {
-        alert('Location access denied. Please allow location access to continue.');
+        alert('Location access denied. Please allow location access to continue.' + error);
       }
     );
   };
@@ -66,7 +67,7 @@ export default function HomePage() {
         });
       },
       (err) => {
-        setError('Permission denied or error getting location.');
+        setError('Permission denied or error getting location.' + err);
       }
     );
   }, []);
