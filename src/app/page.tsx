@@ -14,7 +14,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [locationName, setLocationName] = useState('');
-
+  const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
 
 
 
@@ -66,6 +66,13 @@ export default function HomePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const existingId = localStorage.getItem(DEVICE_ID_KEY);
+
+    if (existingId) {
+      // setDeviceId(existingId);
+      alert('You cannot submit the data again');
+      return
+    } 
     // Clear form fields
     // setUserName('');
     // setPhoneNumber('');
@@ -95,6 +102,9 @@ export default function HomePage() {
         setLocationName(locationName)
 
         setLoading(false); // Stop loading
+
+        const newId = uuidv4();
+        localStorage.setItem(DEVICE_ID_KEY, newId);
 
       },
       () => {
@@ -137,6 +147,13 @@ export default function HomePage() {
     // fetchFingerprint();
 
     const deviceId = uuidv4();
+
+    
+    // else {
+      // const newId = uuidv4();
+      // localStorage.setItem(DEVICE_ID_KEY, newId);
+      // setDeviceId(newId);
+    // }
     getFingerprint();
 
     console.log("deviceId:: ", deviceId)
