@@ -13,6 +13,9 @@ export default function HomePage() {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [locationName, setLocationName] = useState('');
+
+
 
 
   const generateToken = (userName: string, phoneNumber: string): string => {
@@ -77,13 +80,20 @@ export default function HomePage() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const tokenValue = generateToken(userName, phoneNumber);
         setToken(tokenValue);
         setLocation({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         });
+
+        const { latitude, longitude } = position.coords;
+        const locationName = await getLocationName(latitude, longitude);
+
+        console.log("locationName:: ", locationName)
+        setLocationName(locationName)
+
         setLoading(false); // Stop loading
 
       },
@@ -92,6 +102,20 @@ export default function HomePage() {
         setLoading(false); // Stop loading
       }
     );
+  };
+
+  const getLocationName = async (latitude: number, longitude: number): Promise<string> => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+      console.log("locationData:: ", data)
+
+      return data.display_name || 'Location not found';
+    } catch (error) {
+      return 'Failed to fetch location name';
+    }
   };
 
 
@@ -214,7 +238,11 @@ export default function HomePage() {
               <p className="text-sm text-gray-700 mt-2 ">
                 Location: Lat <span className='text-[#00563F]'>{location.latitude.toFixed(5)}</span>, Lng  <span className='text-[#00563F]'>{location.longitude.toFixed(5)}</span>
               </p>
+
             )}
+            <p className="text-sm text-gray-700 mt-2 ">
+              Location: <span className='text-[#00563F]'>{locationName}</span>
+            </p>
           </div>
         )}
       </div>
