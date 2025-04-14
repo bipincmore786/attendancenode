@@ -114,6 +114,7 @@ export default function HomePage() {
 
       return data.display_name || 'Location not found';
     } catch (error) {
+      console.log(error)
       return 'Failed to fetch location name';
     }
   };
