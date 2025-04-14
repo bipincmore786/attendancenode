@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
+
 
 export default function HomePage() {
   const [userName, setUserName] = useState('');
@@ -9,6 +12,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
+  const [visitorId, setVisitorId] = useState<string | null>(null);
 
 
   const generateToken = (userName: string, phoneNumber: string): string => {
@@ -26,8 +30,36 @@ export default function HomePage() {
     return numericToken;
   };
 
+  const getFingerprint = async () => {
+    // const fp = await FingerprintJS.load();
+    // const result = await fp.get();
+    // console.log("result:: ", result.visitorId)
 
+    try {
+      // const fp = await FingerprintJS.load();
+      // const result = await fp.get();
+      // setVisitorId(result.visitorId);
+      // console.log("visitorId:: 2 ", visitorId)
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      setVisitorId(data.ip);
+    } catch (error) {
+      console.error('Fingerprint error:', error);
+      setVisitorId(null);
+    } finally {
+      // setLoadingDevice(false);
+    }
+    console.log("visitorId:: 2 ", visitorId)
 
+    return visitorId; // unique & consistent ID
+  };
+
+  useEffect(() => {
+    if (visitorId == null) {
+      return
+    }
+    console.log("visitorId changed ", visitorId)
+  }, [visitorId])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +96,27 @@ export default function HomePage() {
 
 
   useEffect(() => {
+
+    // const fetchFingerprint = async () => {
+    //   try {
+    //     const fp = await FingerprintJS.load();
+    //     const result = await fp.get();
+    //     setDeviceId(result.visitorId);
+    //   } catch (error) {
+    //     console.error('Fingerprint error:', error);
+    //     setDeviceId(null);
+    //   } finally {
+    //     // setLoadingDevice(false);
+    //   }
+    // };
+    // fetchFingerprint();
+
+    const deviceId = uuidv4();
+    getFingerprint();
+
+    console.log("deviceId:: ", deviceId)
+    console.log("visitorId:: 1 ", visitorId)
+    console.log(navigator.userAgent);
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.');
       return;
@@ -76,9 +129,23 @@ export default function HomePage() {
           longitude: position.coords.longitude,
         });
       },
-      (err) => {
-        setError('Permission denied or error getting location.' + err);
-      }
+      (error) => {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            alert('Location permission denied.');
+            break;
+          case error.POSITION_UNAVAILABLE:
+            alert('Location info unavailable.');
+            break;
+          case error.TIMEOUT:
+            alert('Location request timed out.');
+            break;
+          // case error.UNKNOWN_ERROR:
+          //   alert('An unknown location error occurred.');
+          //   break;
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
     );
   }, []);
 
@@ -139,6 +206,7 @@ export default function HomePage() {
           <div className="mt-6 text-center">
             {/* <p className="text-lg font-semibold text-green-700">Your token number is : {token}</p> */}
             <h2 className="text-xl font-semibold  text-[#000000]">Your token number is : {token}</h2>
+            <p className="text-s font-semibold  text-[#000000]">Your visitorId is : {visitorId}</p>
             <p className="text-sm text-gray-500 mt-1  text-[#000000]">
               Please share this token at the check-in desk.
             </p>
