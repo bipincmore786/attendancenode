@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
+// import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 
 export default function HomePage() {
