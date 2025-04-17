@@ -14,7 +14,7 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [locationName, setLocationName] = useState('');
-  const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
+  const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_2';
 
 
 
