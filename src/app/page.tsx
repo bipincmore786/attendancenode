@@ -73,7 +73,7 @@ export default function HomePage() {
     e.preventDefault();
     const existingId = localStorage.getItem(DEVICE_ID_KEY);
 
-    console.log(location, locationName)
+    console.log(location, locationName, existingId)
 
     // if (existingId) {
     //   // setDeviceId(existingId);
