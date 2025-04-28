@@ -243,7 +243,7 @@ export default function HomePage() {
 
   };
 
-  const sendRequest = async (deviceId: any) => {
+  const sendRequest = async (deviceId: string) => {
     const payload = {
       activationCode: activationCode,
       userName: userName,
