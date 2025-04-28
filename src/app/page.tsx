@@ -265,6 +265,7 @@ export default function HomePage() {
       console.log('API Response:', result);
       // handle success (e.g., show a confirmation modal)
     } catch (error) {
+      console.log(error)
       // handle error (e.g., show error toast or alert)
     }
   }

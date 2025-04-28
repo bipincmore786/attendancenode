@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const API_URL = 'https://dummyjson.com/c/378b-70b1-4c56-a5f2';
 const USERNAME = 'rfccrm';
@@ -30,8 +30,9 @@ export const sendAttendanceData = async (data: {
     });
 
     return response.data;
-  } catch (error: any) {
-    console.error('Error sending attendance data:', error.response?.data || error.message);
+  } catch (error) {
+    const err = error as AxiosError;
+    console.error('Error sending attendance data:', err?.response?.data || err.message);
     throw error;
   }
 };
