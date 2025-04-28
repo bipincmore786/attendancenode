@@ -40,3 +40,7 @@ body {
 .animate-fade-in {
   animation: fade-in 0.3s ease-out forwards;
 }
+
+.Toastify__toast-theme--light {
+  border-radius: 10px !important;
+}

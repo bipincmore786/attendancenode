@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.6.2",
+    "axios": "^1.9.0",
     "device-uuid": "^1.0.4",
     "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-toastify": "^11.0.5",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
