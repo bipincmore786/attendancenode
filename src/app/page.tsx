@@ -18,7 +18,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
-  const [visitorId, setVisitorId] = useState<string | null>(null);
+  // const [visitorId, setVisitorId] = useState<string | null>(null);
   const [locationName, setLocationName] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
@@ -95,19 +95,19 @@ export default function HomePage() {
   };
 
 
-  const getFingerprint = async () => {
-    try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      setVisitorId(data.ip);
-    } catch (error) {
-      console.error('Fingerprint error:', error);
-      setVisitorId(null);
-    } finally {
-      // setLoadingDevice(false);
-    }
-    return visitorId; // unique & consistent ID
-  };
+  // const getFingerprint = async () => {
+  //   try {
+  //     const res = await fetch('https://api.ipify.org?format=json');
+  //     const data = await res.json();
+  //     setVisitorId(data.ip);
+  //   } catch (error) {
+  //     console.error('Fingerprint error:', error);
+  //     setVisitorId(null);
+  //   } finally {
+  //     // setLoadingDevice(false);
+  //   }
+  //   return visitorId; // unique & consistent ID
+  // };
 
   // useEffect(() => {
   //   if (resendTimer === 0) return;
@@ -275,7 +275,7 @@ export default function HomePage() {
       phoneNumber: phoneNumber,
       orgName: orgName,
       deviceId: deviceId,
-      ipAddress: visitorId ?? '',
+      // ipAddress: visitorId ?? '',
       token: token,
       location: {
         latitude: location?.latitude ?? 0,
@@ -391,10 +391,10 @@ export default function HomePage() {
     // localStorage.setItem(DEVICE_ID_KEY, newId);
     // setDeviceId(newId);
     // }
-    getFingerprint();
+    // getFingerprint();
 
     console.log("deviceId:: ", deviceId)
-    console.log("visitorId:: 1 ", visitorId)
+    // console.log("visitorId:: 1 ", visitorId)
     console.log(navigator.userAgent);
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.');

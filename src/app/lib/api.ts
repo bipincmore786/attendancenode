@@ -11,7 +11,7 @@ export const sendAttendanceData = async (data: {
   phoneNumber: string;
   orgName: string;
   deviceId: string;
-  ipAddress: string;
+  // ipAddress: string;
   token: string;
   location: {
     latitude: number;
