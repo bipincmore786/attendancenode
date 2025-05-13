@@ -621,7 +621,7 @@ export default function HomePage() {
                       events = JSON.stringify([]); // Initialize an empty array if no events exist
                     }
 
-                    let eventsArray = JSON.parse(events); // Now it's safe to parse
+                    const eventsArray = JSON.parse(events); // Now it's safe to parse
 
                     // New event data to add
                     const newEvent = {
