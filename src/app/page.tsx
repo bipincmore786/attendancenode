@@ -8,6 +8,13 @@ import 'react-toastify/dist/ReactToastify.css';
 // import crypto from 'crypto';
 
 export default function HomePage() {
+  interface EventDetails {
+    eventCode: string,
+    eventDate: string,
+    eventDays: number,
+    eventTime: string,
+    eventVenue: string
+  }
 
   const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
   const [activationCode, setActivationCode] = useState("");
@@ -635,7 +642,7 @@ export default function HomePage() {
 
 
                     // Check if the event already exists based on eventCode
-                    const eventExists = eventsArray.some((event: any) => event.eventCode === newEvent.eventCode);
+                    const eventExists = eventsArray.some((event: EventDetails) => event.eventCode === newEvent.eventCode);
 
                     if (!eventExists) {
                       // If event doesn't exist, add it
