@@ -2,15 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { sendAttendanceData } from './lib/api';
+import { sendActivationCode, sendAttendanceData } from './lib/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+// import crypto from 'crypto';
 
 export default function HomePage() {
 
   const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
-  const [activationCode, setActivationCode] = useState('');
+  const [activationCode, setActivationCode] = useState("");
   const [userName, setUserName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [orgName, setOrgName] = useState('');
@@ -27,8 +27,44 @@ export default function HomePage() {
   // const [isOtpSent, setIsOtpSent] = useState(false);
   // const [otpError, setOtpError] = useState<string | null>(null);
   // const [resendTimer, setResendTimer] = useState(0);
+  // const generatedTokens = new Set<string>();
 
-  const generateToken = (userName: string, phoneNumber: string): string => {
+
+  // const generateToken = (userName: string, phoneNumber: string): string => {
+  //   const timestamp = Date.now().toString();
+  //   const seed = userName + phoneNumber + timestamp;
+  //   console.log(`seed ${seed}`)
+
+  //   let hash = 0;
+  //   for (let i = 0; i < seed.length; i++) {
+  //     // hash = (hash << 5) - hash + seed.charCodeAt(i);
+  //     hash = hash + seed.charCodeAt(i);
+  //     hash |= 0; // Convert to 32-bit integer
+  //   }
+  //   // Convert to positive number and format to 5 digits
+  //   const numericToken = Math.abs(hash % 100000).toString();
+  //   console.log(`numericToken T${numericToken}`)
+  //   return `T${numericToken}`;
+  // };
+
+  // const generateTokenNew = (userName: string, phoneNumber: string): string => {
+  //   const timestamp = Date.now().toString();
+  //   const seed = userName + phoneNumber + timestamp;
+
+  //   let hash = 0;
+  //   for (let i = 0; i < seed.length; i++) {
+  //     hash = (hash << 5) - hash + seed.charCodeAt(i);
+  //     hash |= 0; // Convert to 32-bit integer
+  //   }
+
+  //   // Convert to positive number
+  //   const numericToken = Math.abs(hash).toString();
+  //   console.log(`numericToken T${numericToken} ` + numericToken.length)
+
+  //   return `T${numericToken}`;
+  // };
+
+  const generateTokenNew = (userName: string, phoneNumber: string): string => {
     const timestamp = Date.now().toString();
     const seed = userName + phoneNumber + timestamp;
 
@@ -37,10 +73,27 @@ export default function HomePage() {
       hash = (hash << 5) - hash + seed.charCodeAt(i);
       hash |= 0; // Convert to 32-bit integer
     }
-    // Convert to positive number and format to 5 digits
-    const numericToken = Math.abs(hash % 100000).toString().padStart(5, '0');
-    return `T${numericToken}`;
+
+    const numericToken = Math.abs(hash).toString();
+    const finalToken = `T${numericToken}`;
+
+    // Get previously stored tokens
+    const storedTokens = JSON.parse(localStorage.getItem('generatedTokens') || '[]');
+
+    console.log("finalToken:: ", finalToken, storedTokens)
+
+
+    // Check for duplicate
+    if (storedTokens.includes(finalToken)) {
+      console.warn(`Duplicate token detected: ${finalToken}`);
+    } else {
+      storedTokens.push(finalToken);
+      localStorage.setItem('generatedTokens', JSON.stringify(storedTokens));
+    }
+
+    return finalToken;
   };
+
 
   const getFingerprint = async () => {
     try {
@@ -72,10 +125,85 @@ export default function HomePage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const newEvent = {
+      eventCode: activationCode,
+      eventDate: "2025-05-12",
+      eventDays: 3,
+      eventTime: "10:00 AM - 5:00 PM",
+      eventVenue: "Convention Center, Vashi"
+    };
+    const today = new Date();
+
+    const dd = String(today.getDate()).padStart(2, '0');
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const yy = String(today.getFullYear()); // Get last two digits of the year
+
+    const formattedDate = `${yy}-${mm}-${dd}`;
+
+    // Check if the event date is in the future
+    if (isEventInThePast(newEvent.eventDate)) {
+      console.log("The event date is in past.");
+      toast.error("The event date is in past.")
+      return
+    } else if (isEventInTheFuture(newEvent.eventDate)) {
+      console.log("The event date is in the future.");
+      toast.error("The event date is in the future.")
+      return
+    } else if (hasUserSubmittedForTheDay(formattedDate, activationCode)) {
+      console.log("You have already submitted an event for this day.");
+      toast.error("You have already submitted an event for this day.")
+      return
+
+    } else {
+
+      // const todayEntry = {
+      //   eventCode: activationCode,
+      //   eventDate: "2025-06-12",
+      //   eventDays: 3,
+      //   eventTime: "10:00 AM - 5:00 PM",
+      //   eventVenue: "Convention Center, New York"
+      // };
+
+      // Save the current date as the last submission date
+      // localStorage.setItem("lastSubmissionDate", formattedDate + "");
+
+      // const eventCode = 'T2003991997';
+      // // const formattedDate = '05/05/2025';
+
+      // const eventCode = 'T2003991997';
+      // const formattedDate = '05/05/2025';
+
+      const newSubmission = {
+        code: activationCode,
+        date: formattedDate
+      };
+
+      // Get existing submissions
+      const existingData = localStorage.getItem("lastSubmission");
+      let submissions = [];
+
+      if (existingData) {
+        submissions = JSON.parse(existingData);
+      }
+
+      // Add new submission
+      submissions.push(newSubmission);
+
+      // Save back to localStorage
+      localStorage.setItem("lastSubmission", JSON.stringify(submissions));
+
+
+
+      toast.success("Event Data submitted succesfully.")
+
+      // return
+    }
+
     const existingId = localStorage.getItem(DEVICE_ID_KEY);
     const existingActication = localStorage.getItem(activationCode);
     console.log(location, existingId, existingActication)
-    const tokenValue = generateToken(userName, phoneNumber);
+    const tokenValue = generateTokenNew(userName, phoneNumber);
     // if (existingId) {
     //   // setDeviceId(existingId);
     //   toast.success('You cannot submit the data again');
@@ -86,11 +214,12 @@ export default function HomePage() {
     // setPhoneNumber('');
     setLoading(true); // Start loading
     console.log(error)
-    setToken('')
     if (!navigator.geolocation) {
       toast.success('Geolocation is not supported by your browser.');
       return;
     }
+    const newId = uuidv4();
+
     if (!location) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
@@ -103,9 +232,7 @@ export default function HomePage() {
           const locationName = await getLocationName(latitude, longitude);
           setLocationName(locationName)
           setLoading(false);
-          const newId = uuidv4();
-          localStorage.setItem(DEVICE_ID_KEY, newId);
-          localStorage.setItem("activationCode", activationCode);
+
           setToken(tokenValue);
           setShowModal(true);
           setActivationCode('')
@@ -123,9 +250,7 @@ export default function HomePage() {
       );
     } else {
       setLoading(false);
-      const newId = uuidv4();
-      localStorage.setItem(DEVICE_ID_KEY, newId);
-      localStorage.setItem("activationCode", activationCode);
+
       setToken(tokenValue);
       setShowModal(true);
       setActivationCode('')
@@ -136,6 +261,11 @@ export default function HomePage() {
       setLocationName('')
       sendRequest(newId)
     }
+
+    localStorage.setItem(DEVICE_ID_KEY, newId);
+    localStorage.setItem("activationCode", activationCode);
+    localStorage.setItem(DEVICE_ID_KEY, newId);
+    localStorage.setItem("activationCode", activationCode);
   };
 
   const sendRequest = async (deviceId: string) => {
@@ -163,6 +293,29 @@ export default function HomePage() {
     }
   }
 
+  const validateEventCode = async () => {
+    const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
+
+    console.log(payload)
+    try {
+      const result = await sendActivationCode(payload);
+
+
+      console.log("result:: ", result)
+      // If event doesn't exist, add it
+      //  eventsArray.push(newEvent);
+
+      // Save the updated array back to localStorage
+      //  localStorage.setItem("events", JSON.stringify(eventsArray));
+
+      toast.success("Event code is valid")
+      console.log("New event added to localStorage.");
+      console.log('API Response:', result);
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const getLocationName = async (latitude: number, longitude: number): Promise<string> => {
     try {
       const response = await fetch(
@@ -177,7 +330,61 @@ export default function HomePage() {
     }
   };
 
+  // Function to check if the event date is in Past
+  const isEventInThePast = (eventDate: string) => {
+    const today = new Date();
+    const eventDateObj = new Date(eventDate);
+    today.setHours(0, 0, 0, 0);
+    eventDateObj.setHours(0, 0, 0, 0);
+    console.log("eventDateObj < today", eventDate, eventDateObj)
+    console.log(eventDateObj)
+    console.log(today)
+    console.log(eventDateObj < today)
+    return eventDateObj < today;
+  };
+
+  // Function to check if the event date is in the future
+  const isEventInTheFuture = (eventDate: string) => {
+    const today = new Date();
+    const eventDateObj = new Date(eventDate);
+    today.setHours(0, 0, 0, 0);
+    eventDateObj.setHours(0, 0, 0, 0);
+    console.log("eventDateObj > today")
+    console.log(eventDateObj)
+    console.log(today)
+    console.log(eventDateObj > today)
+    return eventDateObj > today;
+  };
+
+  // Function to check if the user has already submitted the event for the day
+  const hasUserSubmittedForTheDay = (formattedDate: string, eventCode: string): boolean => {
+    const submissionDataRaw = localStorage.getItem("lastSubmission");
+
+    if (!submissionDataRaw) {
+      console.log("No previous submission found.");
+      return false;
+    }
+
+    const submissionData = JSON.parse(submissionDataRaw);
+
+    // Check if any submission matches both the date and the event code
+    const alreadySubmitted = submissionData.some((entry: { code: string; date: string }) =>
+      entry.code === eventCode &&
+      new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
+    );
+
+    if (alreadySubmitted) {
+      console.log("User has already submitted for this event on this date.");
+      return true;
+    }
+
+    console.log("No matching submission found.");
+    return false;
+  };
+
+
   useEffect(() => {
+    generateTokenNew("Bipin", "9967504677")
     const deviceId = uuidv4();
     // else {
     // const newId = uuidv4();
@@ -233,6 +440,7 @@ export default function HomePage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     };
+
     return (
       <div className="flex flex-wrap  gap-2 mt-4 text-center sm:text-left">
         <span className="text-base sm:text-2xl font-bold text-orange-600">
@@ -359,10 +567,10 @@ export default function HomePage() {
             </div> */}
 
             <div className="w-full flex flex-row gap-2 items-center bg-white shadow-md rounded-lg max-w-md">
-              <div className="flex items-center bg-white rounded-md px-3 py-3 w-full">
+              <div className="flex items-center bg-white rounded-md py-3 w-full">
                 <div className="flex items-center px-3 text-gray-400">
                   <svg
-                    className="w-5 h-5 text-gray-400 mr-1"
+                    className={`w-5 h-5 mr-1 ${!isActivated ? 'text-black' : 'text-gray-400'}`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.5"
@@ -379,7 +587,8 @@ export default function HomePage() {
                 <input
                   type="text"
                   placeholder="Event Code"
-                  className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
+                  // className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
+                  className={`w-full outline-none text-sm ${!isActivated ? 'text-black' : 'text-gray-400'} placeholder-gray-400`}
                   value={activationCode}
                   onChange={(e) => {
                     setShowError(false)
@@ -401,7 +610,51 @@ export default function HomePage() {
                 style={{ height: '48px', minWidth: '80px' }}
                 onClick={() => {
                   if (activationCode.trim()) {
+
+                    validateEventCode()
+                    return
+                    // Get event data from localStorage (it could be null if the item doesn't exist)
+                    let events = localStorage.getItem("events") ?? "[]";
+
+                    // If events is null, initialize an empty array, otherwise parse the existing data
+                    if (events === null) {
+                      events = JSON.stringify([]); // Initialize an empty array if no events exist
+                    }
+
+                    let eventsArray = JSON.parse(events); // Now it's safe to parse
+
+                    // New event data to add
+                    const newEvent = {
+                      eventCode: activationCode,
+                      eventDate: "2025-06-12",
+                      eventDays: 3,
+                      eventTime: "10:00 AM - 5:00 PM",
+                      eventVenue: "Convention Center, New York"
+                    };
+
+
+
+                    // Check if the event already exists based on eventCode
+                    const eventExists = eventsArray.some((event: any) => event.eventCode === newEvent.eventCode);
+
+                    if (!eventExists) {
+                      // If event doesn't exist, add it
+                      eventsArray.push(newEvent);
+
+                      // Save the updated array back to localStorage
+                      localStorage.setItem("events", JSON.stringify(eventsArray));
+
+                      toast.success("Event code is valid")
+                      console.log("New event added to localStorage.");
+                    } else {
+                      console.log("This event already exists in localStorage.", localStorage.getItem("events"));
+
+                    }
+
+
                     setIsActivated(true);
+
+
                   } else {
                     setShowError(true)
                   }
@@ -419,7 +672,7 @@ export default function HomePage() {
           </div>
           <form onSubmit={handleSubmit} className="space-y-2">
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
-              <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 10a4 4 0 100-8 4 4 0 000 8zM2 18a8 8 0 0116 0H2z" />
               </svg>
               <input
@@ -435,7 +688,7 @@ export default function HomePage() {
 
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
               <svg
-                className="w-5 h-5 text-gray-400 mr-3"
+                className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`}
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.5"
@@ -457,18 +710,27 @@ export default function HomePage() {
                 value={phoneNumber}
                 onChange={(e) => {
                   const onlyNums = e.target.value.replace(/[^0-9]/g, '');
+                  const allSameDigits = /^(\d)\1{9}$/; // matches repeated digits
+                  const repeatingTwoDigits = /^(\d\d)\1{4}$/;
+                  if (allSameDigits.test(onlyNums)) {
+                    setError('Mobile number cannot have all digits the same.');
+                    return;
+                  } else if (repeatingTwoDigits.test(onlyNums)) {
+                    setError('Mobile number cannot repeat the same 2-digit pattern.');
+                    return;
+                  }
                   setPhoneNumber(onlyNums);
                 }}
                 required
                 maxLength={10}
                 minLength={10}
                 disabled={!isActivated}
-                pattern="\d{10}"
+                pattern="^[6-9]\d{9}$"
               />
             </div>
             {/* Org/Shop Name */}
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
-              <svg className="w-5 h-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+              <svg className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3h16v2H2V3zm1 4h14v10H3V7zm2 2v2h2V9H5zm4 0v2h2V9H9z" />
               </svg>
               <input
@@ -549,6 +811,7 @@ export default function HomePage() {
                 onClick={() => {
                   setShowModal(false)
                   setIsActivated(false);
+                  setToken('')
 
                 }}
                 className="mt-4 w-full bg-orange-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-200"
