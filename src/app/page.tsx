@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { sendActivationCode, sendAttendanceData } from './lib/api';
+import { sendAttendanceData } from './lib/api';  //sendActivationCode
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // import crypto from 'crypto';
