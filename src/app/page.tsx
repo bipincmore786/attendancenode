@@ -135,7 +135,7 @@ export default function HomePage() {
 
     const newEvent = {
       eventCode: activationCode,
-      eventDate: "2025-05-12",
+      eventDate: "2025-05-14",
       eventDays: 3,
       eventTime: "10:00 AM - 5:00 PM",
       eventVenue: "Convention Center, Vashi"
@@ -633,7 +633,7 @@ export default function HomePage() {
                     // New event data to add
                     const newEvent = {
                       eventCode: activationCode,
-                      eventDate: "2025-06-12",
+                      eventDate: "2025-06-14",
                       eventDays: 3,
                       eventTime: "10:00 AM - 5:00 PM",
                       eventVenue: "Convention Center, New York"
