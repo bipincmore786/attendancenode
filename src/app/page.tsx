@@ -25,7 +25,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
-  // const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [visitorId, setVisitorId] = useState<string | null>(null);
   const [locationName, setLocationName] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
@@ -102,19 +102,21 @@ export default function HomePage() {
   };
 
 
-  // const getFingerprint = async () => {
-  //   try {
-  //     const res = await fetch('https://api.ipify.org?format=json');
-  //     const data = await res.json();
-  //     setVisitorId(data.ip);
-  //   } catch (error) {
-  //     console.error('Fingerprint error:', error);
-  //     setVisitorId(null);
-  //   } finally {
-  //     // setLoadingDevice(false);
-  //   }
-  //   return visitorId; // unique & consistent ID
-  // };
+  const getFingerprint = async () => {
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const data = await res.json();
+      console.log("IP data", data)
+      setVisitorId(data.ip);
+    } catch (error) {
+      console.error('Fingerprint error:', error);
+      setVisitorId(null);
+    } finally {
+      // setLoadingDevice(false);
+    }
+    console.log("IP", visitorId)
+    return visitorId; // unique & consistent ID
+  };
 
   // useEffect(() => {
   //   if (resendTimer === 0) return;
@@ -398,7 +400,7 @@ export default function HomePage() {
     // localStorage.setItem(DEVICE_ID_KEY, newId);
     // setDeviceId(newId);
     // }
-    // getFingerprint();
+    getFingerprint();
 
     console.log("deviceId:: ", deviceId)
     // console.log("visitorId:: 1 ", visitorId)
@@ -439,6 +441,7 @@ export default function HomePage() {
       }
     );
   }, []);
+
 
   const TokenDisplay = ({ token }: { token: string }) => {
     const [copied, setCopied] = useState(false);
@@ -779,8 +782,13 @@ export default function HomePage() {
                   <span className="ml-2 text-orange-700">Lng {location.longitude.toFixed(5)}</span>
                 </p>
               )}
+              {(
+                <p className='text-2xl text-black justify-center text-center' > IP: <span className="text-2xl text-red-500 justify-center text-center ">{visitorId}</span></p>
+              )}
             </div>
+
           )}
+
           {loading && (
             <div className="flex justify-center my-4">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent shadow-lg"></div>
