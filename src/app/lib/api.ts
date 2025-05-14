@@ -39,25 +39,25 @@ export const sendAttendanceData = async (data: {
 };
 
 
-export const sendActivationCode = async (data: {
-  eventcode: string;
-  apikey: string;
-}) => {
-  try {
-    const response = await axios.post(VALIDATE_EVENT_CODE, data, {
-      auth: {
-        username: USERNAME,
-        password: PASSWORD,
-      },
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+// export const sendActivationCode = async (data: {
+//   eventcode: string;
+//   apikey: string;
+// }) => {
+//   try {
+//     const response = await axios.post(VALIDATE_EVENT_CODE, data, {
+//       auth: {
+//         username: USERNAME,
+//         password: PASSWORD,
+//       },
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//     });
 
-    return response.data;
-  } catch (error) {
-    const err = error as AxiosError;
-    console.error('Error sending attendance data:', err?.response?.data || err.message);
-    throw error;
-  }
-};
+//     return response.data;
+//   } catch (error) {
+//     const err = error as AxiosError;
+//     console.error('Error sending attendance data:', err?.response?.data || err.message);
+//     throw error;
+//   }
+// };
