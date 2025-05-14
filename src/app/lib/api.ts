@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
 const API_URL = 'https://dummyjson.com/c/378b-70b1-4c56-a5f2';
-const VALIDATE_EVENT_CODE = 'https://10.52.2.46:44300/sap/bc/rest/rest_webevent?sap-client=400'; // 'http://APAR-S4-Public-NLB-48e77eaa902d59f9.elb.ap-south-1.amazonaws.com:8020/sap/bc/rest/rest_webevent?sap-client=400';
+// const VALIDATE_EVENT_CODE = 'https://10.52.2.46:44300/sap/bc/rest/rest_webevent?sap-client=400'; // 'http://APAR-S4-Public-NLB-48e77eaa902d59f9.elb.ap-south-1.amazonaws.com:8020/sap/bc/rest/rest_webevent?sap-client=400';
 const USERNAME = 'rfccrm';
 const PASSWORD = 'Initial0@';
 
