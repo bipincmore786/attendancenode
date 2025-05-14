@@ -300,28 +300,28 @@ export default function HomePage() {
     }
   }
 
-  const validateEventCode = async () => {
-    const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
+  // const validateEventCode = async () => {
+  //   const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
 
-    console.log(payload)
-    try {
-      const result = await sendActivationCode(payload);
+  //   console.log(payload)
+  //   try {
+  //     const result = await sendActivationCode(payload);
 
 
-      console.log("result:: ", result)
-      // If event doesn't exist, add it
-      //  eventsArray.push(newEvent);
+  //     console.log("result:: ", result)
+  //     // If event doesn't exist, add it
+  //     //  eventsArray.push(newEvent);
 
-      // Save the updated array back to localStorage
-      //  localStorage.setItem("events", JSON.stringify(eventsArray));
+  //     // Save the updated array back to localStorage
+  //     //  localStorage.setItem("events", JSON.stringify(eventsArray));
 
-      toast.success("Event code is valid")
-      console.log("New event added to localStorage.");
-      console.log('API Response:', result);
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  //     toast.success("Event code is valid")
+  //     console.log("New event added to localStorage.");
+  //     console.log('API Response:', result);
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
+  // }
 
   const getLocationName = async (latitude: number, longitude: number): Promise<string> => {
     try {
@@ -618,8 +618,8 @@ export default function HomePage() {
                 onClick={() => {
                   if (activationCode.trim()) {
 
-                    validateEventCode()
-                    return
+                    // validateEventCode()
+                    // return
                     // Get event data from localStorage (it could be null if the item doesn't exist)
                     let events = localStorage.getItem("events") ?? "[]";
 
