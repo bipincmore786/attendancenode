@@ -54,7 +54,7 @@ export const sendActivationCode = async (data: {
       //   password: PASSWORD,
       // },
       headers: {
-        // 'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
         'Authorization': 'Basic ' + btoa('rfccrm' + ':' + 'Initial0@'),
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
