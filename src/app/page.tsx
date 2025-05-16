@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { sendActivationCode, sendAttendanceData } from './lib/api';  //sendActivationCode
+import { sendActivationCode, sendAttendanceData, verifyAPI } from './lib/api';  //sendActivationCode
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // import crypto from 'crypto';
@@ -305,6 +305,17 @@ export default function HomePage() {
       console.log(error)
     }
   }
+
+  const checkAPI = async () => {
+    try {
+      const result = await verifyAPI();
+      console.log("checkAPI:: a", result)
+    } catch (error) {
+      console.log(error)
+    }
+
+  }
+
 
   const validateEventCode = async () => {
     const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
@@ -624,6 +635,9 @@ export default function HomePage() {
                 style={{ height: '48px', minWidth: '80px' }}
                 onClick={() => {
                   if (activationCode.trim()) {
+
+                    // 
+                    checkAPI()
 
                     validateEventCode()
                     // return

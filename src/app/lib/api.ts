@@ -65,3 +65,23 @@ export const sendActivationCode = async (data: {
     throw error;
   }
 };
+
+export const verifyAPI = async () => {
+  try {
+    const response = await axios.get('https://6826f87a397e48c91318016c.mockapi.io/eventattendance/eventcode', {
+      auth: {
+        username: USERNAME,
+        password: PASSWORD,
+      },
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    const err = error as AxiosError;
+    console.error('Error fetching attendance data:', err?.response?.data || err.message);
+    throw error;
+  }
+};
