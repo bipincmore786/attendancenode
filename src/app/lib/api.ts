@@ -27,10 +27,10 @@ export const sendAttendanceData = async (data: {
       // },
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('rfccrm' + ':' + 'Initial0@'),
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
-        'Access-Control-Allow-Headers': '*',
+        // 'Authorization': 'Basic ' + btoa('rfccrm' + ':' + 'Initial0@'),
+        // 'Access-Control-Allow-Origin': '*',
+        // 'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
+        // 'Access-Control-Allow-Headers': '*',
       },
     });
 
