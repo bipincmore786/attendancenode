@@ -66,9 +66,9 @@ export const sendActivationCode = async (data: {
   }
 };
 
-export const verifyAPI = async () => {
+export const verifyAPI = async () =>{
   try {
-    const response = await axios.get('https://6826f87a397e48c91318016c.mockapi.io/eventattendance/eventcode', {
+    const response = await axios.post('https://6826f87a397e48c91318016c.mockapi.io/eventattendance/eventcode', {}, {
       auth: {
         username: USERNAME,
         password: PASSWORD,
@@ -81,7 +81,7 @@ export const verifyAPI = async () => {
     return response.data;
   } catch (error) {
     const err = error as AxiosError;
-    console.error('Error fetching attendance data:', err?.response?.data || err.message);
+    console.error('Error sending attendance data:', err?.response?.data || err.message);
     throw error;
   }
-};
+}
