@@ -49,10 +49,10 @@ export const sendActivationCode = async (data: {
 }) => {
   try {
     const response = await axios.post(VALIDATE_EVENT_CODE, data, {
-      auth: {
-        username: USERNAME,
-        password: PASSWORD,
-      },
+      // auth: {
+      //   username: USERNAME,
+      //   password: PASSWORD,
+      // },
       headers: {
         'Content-Type': 'application/json',
       },
