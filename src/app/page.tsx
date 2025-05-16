@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { sendAttendanceData } from './lib/api';  //sendActivationCode
+import { sendActivationCode, sendAttendanceData } from './lib/api';  //sendActivationCode
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // import crypto from 'crypto';
@@ -13,7 +13,9 @@ export default function HomePage() {
     eventDate: string,
     eventDays: number,
     eventTime: string,
-    eventVenue: string
+    eventVenue: string,
+    start_datetime: string,
+    end_datetime: string
   }
 
   const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
@@ -140,7 +142,9 @@ export default function HomePage() {
       eventDate: "2025-05-14",
       eventDays: 3,
       eventTime: "10:00 AM - 5:00 PM",
-      eventVenue: "Convention Center, Vashi"
+      eventVenue: "Convention Center, Vashi",
+      start_datetime: "2025-05-15T09:00:00",
+      end_datetime: "2025-05-15T14:39:00"
     };
     const today = new Date();
 
@@ -150,20 +154,20 @@ export default function HomePage() {
 
     const formattedDate = `${yy}-${mm}-${dd}`;
 
-    // Check if the event date is in the future
-    if (isEventInThePast(newEvent.eventDate)) {
-      console.log("The event date is in past.");
-      toast.error("The event date is in past.")
-      return
-    } else if (isEventInTheFuture(newEvent.eventDate)) {
-      console.log("The event date is in the future.");
-      toast.error("The event date is in the future.")
-      return
-    } else if (hasUserSubmittedForTheDay(formattedDate, activationCode)) {
+    // Check if the event dat e is in the future
+    if (hasUserSubmittedForTheDay(formattedDate, activationCode)) {
       console.log("You have already submitted an event for this day.");
       toast.error("You have already submitted an event for this day.")
       return
 
+    } else if (isEventInThePast(newEvent.end_datetime)) {
+      console.log("The event date is in past.");
+      toast.error("The event date is in past.")
+      return
+    } else if (isEventInTheFuture(newEvent.start_datetime)) {
+      console.log("The event date is in the future.");
+      toast.error("The event date is in the future.")
+      return
     } else {
 
       // const todayEntry = {
@@ -302,28 +306,28 @@ export default function HomePage() {
     }
   }
 
-  // const validateEventCode = async () => {
-  //   const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
+  const validateEventCode = async () => {
+    const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
 
-  //   console.log(payload)
-  //   try {
-  //     const result = await sendActivationCode(payload);
+    console.log(payload)
+    try {
+      const result = await sendActivationCode(payload);
 
 
-  //     console.log("result:: ", result)
-  //     // If event doesn't exist, add it
-  //     //  eventsArray.push(newEvent);
+      console.log("result:: ", result)
+      // If event doesn't exist, add it
+      //  eventsArray.push(newEvent);
 
-  //     // Save the updated array back to localStorage
-  //     //  localStorage.setItem("events", JSON.stringify(eventsArray));
+      // Save the updated array back to localStorage
+      //  localStorage.setItem("events", JSON.stringify(eventsArray));
 
-  //     toast.success("Event code is valid")
-  //     console.log("New event added to localStorage.");
-  //     console.log('API Response:', result);
-  //   } catch (error) {
-  //     console.log(error)
-  //   }
-  // }
+      toast.success("Event code is valid")
+      console.log("New event added to localStorage.");
+      console.log('API Response:', result);
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   const getLocationName = async (latitude: number, longitude: number): Promise<string> => {
     try {
@@ -343,8 +347,8 @@ export default function HomePage() {
   const isEventInThePast = (eventDate: string) => {
     const today = new Date();
     const eventDateObj = new Date(eventDate);
-    today.setHours(0, 0, 0, 0);
-    eventDateObj.setHours(0, 0, 0, 0);
+    // today.setHours(0, 0, 0, 0);
+    // eventDateObj.setHours(0, 0, 0, 0);
     console.log("eventDateObj < today", eventDate, eventDateObj)
     console.log(eventDateObj)
     console.log(today)
@@ -356,8 +360,8 @@ export default function HomePage() {
   const isEventInTheFuture = (eventDate: string) => {
     const today = new Date();
     const eventDateObj = new Date(eventDate);
-    today.setHours(0, 0, 0, 0);
-    eventDateObj.setHours(0, 0, 0, 0);
+    // today.setHours(0, 0, 0, 0);
+    // eventDateObj.setHours(0, 0, 0, 0);
     console.log("eventDateObj > today")
     console.log(eventDateObj)
     console.log(today)
@@ -621,7 +625,7 @@ export default function HomePage() {
                 onClick={() => {
                   if (activationCode.trim()) {
 
-                    // validateEventCode()
+                    validateEventCode()
                     // return
                     // Get event data from localStorage (it could be null if the item doesn't exist)
                     let events = localStorage.getItem("events") ?? "[]";
@@ -639,7 +643,9 @@ export default function HomePage() {
                       eventDate: "2025-06-14",
                       eventDays: 3,
                       eventTime: "10:00 AM - 5:00 PM",
-                      eventVenue: "Convention Center, New York"
+                      eventVenue: "Convention Center, New York",
+                      start_datetime: "2025-05-15T09:00:00",
+                      end_datetime: "2025-05-17T18:00:00"
                     };
 
 
@@ -783,7 +789,7 @@ export default function HomePage() {
                 </p>
               )}
               {(
-                <p className='text-2xl text-black justify-center text-center' > IP: <span className="text-2xl text-red-500 justify-center text-center ">{visitorId}</span></p>
+                <p className='text-l text-black' > IP Address: <span className="text-2xl text-red-500 justify-center text-center">{visitorId}</span></p>
               )}
             </div>
 
