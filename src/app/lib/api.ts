@@ -21,12 +21,13 @@ export const sendAttendanceData = async (data: {
 }) => {
   try {
     const response = await axios.post(API_URL, data, {
-      auth: {
-        username: USERNAME,
-        password: PASSWORD,
-      },
+      // auth: {
+      //   username: USERNAME,
+      //   password: PASSWORD,
+      // },
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Basic ' + btoa('rfccrm' + ':' + 'Initial0@'),
       },
     });
 
