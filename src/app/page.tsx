@@ -522,7 +522,7 @@ export default function HomePage() {
                     );
 
                     console.log('eventExists', eventExists)
-                    setconsoleMessage('eventExists')
+                    setconsoleMessage('eventExists' + eventExists)
 
                     if (!eventExists) {
 
