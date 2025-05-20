@@ -2,21 +2,21 @@
 
 import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { sendActivationCode, sendAttendanceData, verifyAPI } from './lib/api';  //sendActivationCode
+import { sendActivationCode, sendAttendanceData } from './lib/api';  //sendActivationCode
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // import crypto from 'crypto';
 
 export default function HomePage() {
-  interface EventDetails {
-    eventCode: string,
-    eventDate: string,
-    eventDays: number,
-    eventTime: string,
-    eventVenue: string,
-    start_datetime: string,
-    end_datetime: string
-  }
+  // interface EventDetails {
+  //   eventCode: string,
+  //   eventDate: string,
+  //   eventDays: number,
+  //   eventTime: string,
+  //   eventVenue: string,
+  //   startDatetime: string,
+  //   endDatetime: string
+  // }
 
   const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
   const [activationCode, setActivationCode] = useState("");
@@ -32,6 +32,8 @@ export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [startDatetime, setStartDatetime] = useState('');
+  const [endDatetime, setEndDatetime] = useState('');
   // const [otp, setOtp] = useState('');
   // const [isOtpSent, setIsOtpSent] = useState(false);
   // const [otpError, setOtpError] = useState<string | null>(null);
@@ -73,35 +75,35 @@ export default function HomePage() {
   //   return `T${numericToken}`;
   // };
 
-  const generateTokenNew = (userName: string, phoneNumber: string): string => {
-    const timestamp = Date.now().toString();
-    const seed = userName + phoneNumber + timestamp;
+  // const generateTokenNew = (userName: string, phoneNumber: string): string => {
+  //   const timestamp = Date.now().toString();
+  //   const seed = userName + phoneNumber + timestamp;
 
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = (hash << 5) - hash + seed.charCodeAt(i);
-      hash |= 0; // Convert to 32-bit integer
-    }
+  //   let hash = 0;
+  //   for (let i = 0; i < seed.length; i++) {
+  //     hash = (hash << 5) - hash + seed.charCodeAt(i);
+  //     hash |= 0; // Convert to 32-bit integer
+  //   }
 
-    const numericToken = Math.abs(hash).toString();
-    const finalToken = `T${numericToken}`;
+  //   const numericToken = Math.abs(hash).toString();
+  //   const finalToken = `T${numericToken}`;
 
-    // Get previously stored tokens
-    const storedTokens = JSON.parse(localStorage.getItem('generatedTokens') || '[]');
+  //   // Get previously stored tokens
+  //   const storedTokens = JSON.parse(localStorage.getItem('generatedTokens') || '[]');
 
-    console.log("finalToken:: ", finalToken, storedTokens)
+  //   console.log("finalToken:: ", finalToken, storedTokens)
 
 
-    // Check for duplicate
-    if (storedTokens.includes(finalToken)) {
-      console.warn(`Duplicate token detected: ${finalToken}`);
-    } else {
-      storedTokens.push(finalToken);
-      localStorage.setItem('generatedTokens', JSON.stringify(storedTokens));
-    }
+  //   // Check for duplicate
+  //   if (storedTokens.includes(finalToken)) {
+  //     console.warn(`Duplicate token detected: ${finalToken}`);
+  //   } else {
+  //     storedTokens.push(finalToken);
+  //     localStorage.setItem('generatedTokens', JSON.stringify(storedTokens));
+  //   }
 
-    return finalToken;
-  };
+  //   return finalToken;
+  // };
 
 
   const getFingerprint = async () => {
@@ -137,15 +139,15 @@ export default function HomePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newEvent = {
-      eventCode: activationCode,
-      eventDate: "2025-05-14",
-      eventDays: 3,
-      eventTime: "10:00 AM - 5:00 PM",
-      eventVenue: "Convention Center, Vashi",
-      start_datetime: "2025-05-15T09:00:00",
-      end_datetime: "2025-05-15T14:39:00"
-    };
+    // const newEvent = {
+    //   eventCode: activationCode,
+    //   eventDate: "2025-05-17",
+    //   eventDays: 3,
+    //   eventTime: "10:00 AM - 5:00 PM",
+    //   eventVenue: "Convention Center, Vashi",
+    //   startDatetime: "2025-05-15T09:00:00",
+    //   endDatetime: "2025-05-17T18:39:00"
+    // };
     const today = new Date();
 
     const dd = String(today.getDate()).padStart(2, '0');
@@ -160,11 +162,11 @@ export default function HomePage() {
       toast.error("You have already submitted an event for this day.")
       return
 
-    } else if (isEventInThePast(newEvent.end_datetime)) {
+    } else if (isEventInThePast(endDatetime)) {
       console.log("The event date is in past.");
       toast.error("The event date is in past.")
       return
-    } else if (isEventInTheFuture(newEvent.start_datetime)) {
+    } else if (isEventInTheFuture(startDatetime)) {
       console.log("The event date is in the future.");
       toast.error("The event date is in the future.")
       return
@@ -189,7 +191,8 @@ export default function HomePage() {
 
       const newSubmission = {
         code: activationCode,
-        date: formattedDate
+        date: formattedDate,
+        ipaddress: visitorId
       };
 
       // Get existing submissions
@@ -216,7 +219,7 @@ export default function HomePage() {
     const existingId = localStorage.getItem(DEVICE_ID_KEY);
     const existingActication = localStorage.getItem(activationCode);
     console.log(location, existingId, existingActication)
-    const tokenValue = generateTokenNew(userName, phoneNumber);
+    // const tokenValue = generateTokenNew(userName, phoneNumber);
     // if (existingId) {
     //   // setDeviceId(existingId);
     //   toast.success('You cannot submit the data again');
@@ -231,12 +234,12 @@ export default function HomePage() {
       toast.success('Geolocation is not supported by your browser.');
       return;
     }
-    const newId = uuidv4();
+    // const newId = uuidv4();
 
     if (!location) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          setToken(tokenValue);
+          // setToken(tokenValue);
           setLocation({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
@@ -244,17 +247,17 @@ export default function HomePage() {
           const { latitude, longitude } = position.coords;
           const locationName = await getLocationName(latitude, longitude);
           setLocationName(locationName)
-          setLoading(false);
+          // setLoading(false);
 
-          setToken(tokenValue);
-          setShowModal(true);
-          setActivationCode('')
-          setUserName('')
-          setPhoneNumber('')
-          setOrgName('')
-          setLocation(null)
-          setLocationName('')
-          sendRequest(newId)
+          // setToken(tokenValue);
+          // setShowModal(true);
+          // setActivationCode('')
+          // setUserName('')
+          // setPhoneNumber('')
+          // setOrgName('')
+          // setLocation(null)
+          // setLocationName('')
+          sendRequest()
         },
         () => {
           toast.error('Location permission denied. Cannot generate token.');
@@ -262,59 +265,89 @@ export default function HomePage() {
         }
       );
     } else {
-      setLoading(false);
+      // setLoading(false);
 
-      setToken(tokenValue);
-      setShowModal(true);
-      setActivationCode('')
-      setUserName('')
-      setPhoneNumber('')
-      setOrgName('')
-      setLocation(null)
-      setLocationName('')
-      sendRequest(newId)
+      // setToken(tokenValue);
+      // setShowModal(true);
+      // setActivationCode('')
+      // setUserName('')
+      // setPhoneNumber('')
+      // setOrgName('')
+      // setLocation(null)
+      // setLocationName('')
+      sendRequest()
     }
 
-    localStorage.setItem(DEVICE_ID_KEY, newId);
+    // localStorage.setItem(DEVICE_ID_KEY, newId);
     localStorage.setItem("activationCode", activationCode);
-    localStorage.setItem(DEVICE_ID_KEY, newId);
+    // localStorage.setItem(DEVICE_ID_KEY, newId);
     localStorage.setItem("activationCode", activationCode);
   };
 
-  const sendRequest = async (deviceId: string) => {
+  const sendRequest = async () => {
     const payload = {
-      activationCode: activationCode,
-      userName: userName,
-      phoneNumber: phoneNumber,
-      orgName: orgName,
-      deviceId: deviceId,
-      // ipAddress: visitorId ?? '',
-      token: token,
-      location: {
-        latitude: location?.latitude ?? 0,
-        longitude: location?.longitude ?? 0,
-      },
-      locationName: locationName,
+      apikey: "SUBMIT",
+      eventcode: activationCode,
+      vstrname: userName,
+      vstrnumb: phoneNumber,
+      vstrfrom: orgName,
+      geoloc: locationName,
+      geolat: location?.latitude ?? 0,
+      geolon: location?.longitude ?? 0
     };
+    // activationCode: activationCode,
+    // userName: userName,
+    // phoneNumber: phoneNumber,
+    // orgName: orgName,
+    // deviceId: deviceId,
+    // ipAddress: visitorId ?? '',
+    // token: token,
+    // location: {
+    //   latitude: location?.latitude ?? 0,
+    //   longitude: location?.longitude ?? 0,
+    // },
+    // locationName: locationName,
 
     console.log(payload)
     try {
       const result = await sendAttendanceData(payload);
       console.log('API Response:', result);
+
+      if (result.data[0].status === "fail") {
+        toast.error(result.data[0].message)
+        return;
+      } else if (result.data[0].status === "success") {
+
+        setToken(result.data[0].token)
+
+        setShowModal(true);
+        setActivationCode('')
+        setUserName('')
+        setPhoneNumber('')
+        setOrgName('')
+        setLocation(null)
+        setLocationName('')
+
+      }
+
+
+      setLoading(false)
     } catch (error) {
+      setLoading(false)
+
       console.log(error)
     }
   }
 
-  const checkAPI = async () => {
-    try {
-      const result = await verifyAPI();
-      console.log("checkAPI:: a", result)
-    } catch (error) {
-      console.log(error)
-    }
+  // const checkAPI = async () => {
+  //   try {
+  //     const result = await verifyAPI();
+  //     console.log("checkAPI:: a", result)
+  //   } catch (error) {
+  //     console.log(error)
+  //   }
 
-  }
+  // }
 
 
   const validateEventCode = async () => {
@@ -324,17 +357,54 @@ export default function HomePage() {
     try {
       const result = await sendActivationCode(payload);
 
+      // result = {
+      //   "data": [
+      //     {
+      //       "status": "success",
+      //       "message": "Invalid Event Code",
+      //       startDatetime: "2025-05-20T09:00:00",
+      //       endDatetime: "2025-05-20T18:00:00"
+      //     }
+      //   ]
+      // }
 
-      console.log("result:: ", result)
+      if (result.data[0].status === "fail") {
+        toast.error(result.data[0].message)
+        return
+      } else {
+        setIsActivated(true);
+
+        console.log("result:: ", result)
+        console.log(result.data[0].startDatetime, result.data[0].endDatetime)
+        setStartDatetime(result.data[0].startDatetime)
+        setEndDatetime(result.data[0].endDatetime)
+
+        toast.success("Event code is valid")
+        console.log("New event added to localStorage.");
+        console.log('API Response:', result);
+
+        let events = localStorage.getItem("events") ?? "[]";
+
+        // If events is null, initialize an empty array, otherwise parse the existing data
+        if (events === null) {
+          events = JSON.stringify([]); // Initialize an empty array if no events exist
+        }
+
+        const eventsArray = JSON.parse(events);
+        // If event doesn't exist, add it
+        eventsArray.push(result);
+
+        // Save the updated array back to localStorage
+        localStorage.setItem("events", JSON.stringify(eventsArray));
+
+      }
+
       // If event doesn't exist, add it
       //  eventsArray.push(newEvent);
 
       // Save the updated array back to localStorage
       //  localStorage.setItem("events", JSON.stringify(eventsArray));
 
-      toast.success("Event code is valid")
-      console.log("New event added to localStorage.");
-      console.log('API Response:', result);
     } catch (error) {
       console.log(error)
     }
@@ -392,7 +462,7 @@ export default function HomePage() {
     const submissionData = JSON.parse(submissionDataRaw);
 
     // Check if any submission matches both the date and the event code
-    const alreadySubmitted = submissionData.some((entry: { code: string; date: string }) =>
+    const alreadySubmitted = submissionData.some((entry: { code: string; date: string; ipaddress: string }) =>
       entry.code === eventCode &&
       new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
     );
@@ -408,7 +478,7 @@ export default function HomePage() {
 
 
   useEffect(() => {
-    generateTokenNew("Bipin", "9967504677")
+    // generateTokenNew("Bipin", "9967504677")
     const deviceId = uuidv4();
     // else {
     // const newId = uuidv4();
@@ -513,7 +583,7 @@ export default function HomePage() {
         <ToastContainer
           className="p-6 "
           position="bottom-center"
-          autoClose={5000}
+          autoClose={3000}
         />
       </div>
       {/* Mobile-only Top Welcome Section */}
@@ -617,7 +687,7 @@ export default function HomePage() {
                   value={activationCode}
                   onChange={(e) => {
                     setShowError(false)
-                    setActivationCode(e.target.value);
+                    setActivationCode(e.target.value.toLocaleUpperCase());
                     if (!e.target.value.trim()) {
                       setIsActivated(false);
                     }
@@ -637,12 +707,13 @@ export default function HomePage() {
                   if (activationCode.trim()) {
 
                     // 
-                    checkAPI()
+                    // checkAPI()
 
-                    validateEventCode()
                     // return
                     // Get event data from localStorage (it could be null if the item doesn't exist)
-                    let events = localStorage.getItem("events") ?? "[]";
+
+                    // =========================
+                    let events = localStorage.getItem("lastSubmission") ?? JSON.stringify([]);
 
                     // If events is null, initialize an empty array, otherwise parse the existing data
                     if (events === null) {
@@ -650,39 +721,52 @@ export default function HomePage() {
                     }
 
                     const eventsArray = JSON.parse(events); // Now it's safe to parse
+                    console.log("events:: ", events, eventsArray)
 
                     // New event data to add
-                    const newEvent = {
-                      eventCode: activationCode,
-                      eventDate: "2025-06-14",
-                      eventDays: 3,
-                      eventTime: "10:00 AM - 5:00 PM",
-                      eventVenue: "Convention Center, New York",
-                      start_datetime: "2025-05-15T09:00:00",
-                      end_datetime: "2025-05-17T18:00:00"
-                    };
+                    // const newEvent = {
+                    //   eventCode: activationCode,
+                    //   eventDate: "2025-06-17",
+                    //   eventDays: 3,
+                    //   eventTime: "10:00 AM - 5:00 PM",
+                    //   eventVenue: "Convention Center, New York",
+                    //   startDatetime: "2025-05-15T09:00:00",
+                    //   endDatetime: "2025-05-17T18:00:00"
+                    // };
 
 
 
                     // Check if the event already exists based on eventCode
-                    const eventExists = eventsArray.some((event: EventDetails) => event.eventCode === newEvent.eventCode);
+                    // const eventExists = eventsArray.some((event: EventDetails) => {
+                    //   console.log("eventsArray.some:: ", activationCode, event.eventCode)
 
+                    //   event.eventCode === activationCode
+                    // });
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+                    const yy = String(today.getFullYear()); // Get last two digits of the year
+
+                    const formattedDate = `${yy}-${mm}-${dd}`;
+                    const eventExists = eventsArray.some((entry: { code: string; date: string }) =>
+                      entry.code === activationCode &&
+                      new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
+                    );
+
+                    console.log('eventExists', eventExists)
                     if (!eventExists) {
-                      // If event doesn't exist, add it
-                      eventsArray.push(newEvent);
 
-                      // Save the updated array back to localStorage
-                      localStorage.setItem("events", JSON.stringify(eventsArray));
-
-                      toast.success("Event code is valid")
+                      // toast.success("Event code is valid")
                       console.log("New event added to localStorage.");
+
+                      validateEventCode()
+
                     } else {
                       console.log("This event already exists in localStorage.", localStorage.getItem("events"));
-
+                      toast.error("You have already submitted an event for this day.")
                     }
+                    // =========================
 
-
-                    setIsActivated(true);
 
 
                   } else {
