@@ -34,6 +34,8 @@ export default function HomePage() {
   const [showError, setShowError] = useState(false);
   const [startDatetime, setStartDatetime] = useState('');
   const [endDatetime, setEndDatetime] = useState('');
+  const [consoleMessage, setconsoleMessage] = useState("")
+
   // const [otp, setOtp] = useState('');
   // const [isOtpSent, setIsOtpSent] = useState(false);
   // const [otpError, setOtpError] = useState<string | null>(null);
@@ -706,6 +708,7 @@ export default function HomePage() {
                 onClick={() => {
                   if (activationCode.trim()) {
 
+                    setconsoleMessage(activationCode)
                     // 
                     // checkAPI()
 
@@ -782,6 +785,9 @@ export default function HomePage() {
 
             {showError && (
               <p className="text-sm text-red-500 mt-1 ml-2">Event code is required</p>
+            )}
+            {(
+              <p className="text-sm text-red-500 mt-1 ml-2">{consoleMessage}</p>
             )}
           </div>
           <form onSubmit={handleSubmit} className="space-y-2">
