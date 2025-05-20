@@ -370,6 +370,8 @@ export default function HomePage() {
       //   ]
       // }
 
+      setconsoleMessage(result)
+
       if (result.data[0].status === "fail") {
         toast.error(result.data[0].message)
         return
