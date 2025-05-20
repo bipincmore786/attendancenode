@@ -370,7 +370,6 @@ export default function HomePage() {
       //   ]
       // }
 
-      setconsoleMessage(result)
 
       if (result.data[0].status === "fail") {
         toast.error(result.data[0].message)
@@ -769,6 +768,8 @@ export default function HomePage() {
                       validateEventCode()
 
                     } else {
+                      setconsoleMessage("This event already exists in localStorage.")
+
                       console.log("This event already exists in localStorage.", localStorage.getItem("events"));
                       toast.error("You have already submitted an event for this day.")
                     }
