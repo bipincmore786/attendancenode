@@ -539,7 +539,8 @@ export default function HomePage() {
                 bg-orange-600 text-white rounded-lg 
                 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-orange-600"
                   style={{ height: '48px', minWidth: '80px' }}
-                  onClick={() => {
+                  onClick={handleValidate}
+                    // () => {
                     // if (activationCode.trim()) {
 
                     //   setconsoleMessage(activationCode)
@@ -595,7 +596,7 @@ export default function HomePage() {
                     // } else {
                     //   setShowError(true)
                     // }
-                  }}
+                  // }}
                   disabled={isActivated}
                 >
                   Validate
