@@ -491,7 +491,7 @@ export default function HomePage() {
 
                   if (activationCode.trim()) {
 
-                    setconsoleMessage(activationCode)
+                    // setconsoleMessage(activationCode)
                     // =========================
                     let events = localStorage.getItem("lastSubmission") ?? JSON.stringify([]);
 
@@ -522,7 +522,7 @@ export default function HomePage() {
                     );
 
                     console.log('eventExists', eventExists)
-                    setconsoleMessage(eventExists)
+                    setconsoleMessage('eventExists')
 
                     if (!eventExists) {
 
@@ -542,6 +542,7 @@ export default function HomePage() {
 
 
                   } else {
+                    setconsoleMessage("ELSE")
                     setShowError(true)
                   }
                 }}
