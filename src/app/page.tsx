@@ -757,6 +757,8 @@ export default function HomePage() {
                     );
 
                     console.log('eventExists', eventExists)
+                    setconsoleMessage(eventExists)
+
                     if (!eventExists) {
 
                       // toast.success("Event code is valid")
