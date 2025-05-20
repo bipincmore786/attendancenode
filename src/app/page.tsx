@@ -24,7 +24,7 @@ export default function HomePage() {
   const [showError, setShowError] = useState(false);
   const [startDatetime, setStartDatetime] = useState('');
   const [endDatetime, setEndDatetime] = useState('');
-  const [consoleMessage, setconsoleMessage] = useState("")
+  const [consoleMessage, setconsoleMessage] = useState("Bipin 1")
 
   const getFingerprint = async () => {
     try {
@@ -41,66 +41,6 @@ export default function HomePage() {
     console.log("IP", visitorId)
     return visitorId; // unique & consistent ID
   };
-
-  const handleValidate = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (activationCode.trim()) {
-
-      setconsoleMessage(activationCode)
-      // =========================
-      let events = localStorage.getItem("lastSubmission") ?? JSON.stringify([]);
-
-      // If events is null, initialize an empty array, otherwise parse the existing data
-      if (events === null) {
-        events = JSON.stringify([]); // Initialize an empty array if no events exist
-      }
-
-      const eventsArray = JSON.parse(events); // Now it's safe to parse
-      console.log("events:: ", events, eventsArray)
-
-
-      // Check if the event already exists based on eventCode
-      // const eventExists = eventsArray.some((event: EventDetails) => {
-      //   console.log("eventsArray.some:: ", activationCode, event.eventCode)
-
-      //   event.eventCode === activationCode
-      // });
-      const today = new Date();
-      const dd = String(today.getDate()).padStart(2, '0');
-      const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-      const yy = String(today.getFullYear()); // Get last two digits of the year
-
-      const formattedDate = `${yy}-${mm}-${dd}`;
-      const eventExists = eventsArray.some((entry: { code: string; date: string }) =>
-        entry.code === activationCode &&
-        new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
-      );
-
-      console.log('eventExists', eventExists)
-      setconsoleMessage(eventExists)
-
-      if (!eventExists) {
-
-        // toast.success("Event code is valid")
-        console.log("New event added to localStorage.");
-
-        validateEventCode()
-
-      } else {
-        setconsoleMessage("This event already exists in localStorage.")
-
-        console.log("This event already exists in localStorage.", localStorage.getItem("events"));
-        toast.error("You have already submitted an event for this day.")
-      }
-      // =========================
-
-
-
-    } else {
-      setShowError(true)
-    }
-  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -494,6 +434,10 @@ export default function HomePage() {
           <p className="text-center text-gray-500 mb-4">
             Enter your valid information to mark attendance
           </p>
+          {(
+            <p className="text-sm text-red-500 mt-1 ml-2">{consoleMessage}</p>
+          )}
+
           <div className="w-full max-w-md">
             <div className="w-full flex flex-row gap-2 items-center bg-white shadow-md rounded-lg max-w-md">
               <div className="flex items-center bg-white rounded-md py-3 w-full">
@@ -532,86 +476,88 @@ export default function HomePage() {
                 />
               </div>
 
-              <form onSubmit={handleValidate}>
-                <button
-                  type="button"
-                  className="text-sm px-4 rounded-md
+              <button
+                type="button"
+                className="text-sm px-4 rounded-md
                 bg-orange-600 text-white rounded-lg 
                 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-orange-600"
-                  style={{ height: '48px', minWidth: '80px' }}
-                  onClick={handleValidate}
-                    // () => {
-                    // if (activationCode.trim()) {
-
-                    //   setconsoleMessage(activationCode)
-                    //   // =========================
-                    //   let events = localStorage.getItem("lastSubmission") ?? JSON.stringify([]);
-
-                    //   // If events is null, initialize an empty array, otherwise parse the existing data
-                    //   if (events === null) {
-                    //     events = JSON.stringify([]); // Initialize an empty array if no events exist
-                    //   }
-
-                    //   const eventsArray = JSON.parse(events); // Now it's safe to parse
-                    //   console.log("events:: ", events, eventsArray)
+                style={{ height: '48px', minWidth: '80px' }}
+                onClick={() => {
+                  // Blur the active element (usually the input)
+                  if (document.activeElement instanceof HTMLElement) {
+                    document.activeElement.blur();
+                  }
 
 
-                    //   // Check if the event already exists based on eventCode
-                    //   // const eventExists = eventsArray.some((event: EventDetails) => {
-                    //   //   console.log("eventsArray.some:: ", activationCode, event.eventCode)
+                  if (activationCode.trim()) {
 
-                    //   //   event.eventCode === activationCode
-                    //   // });
-                    //   const today = new Date();
-                    //   const dd = String(today.getDate()).padStart(2, '0');
-                    //   const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-                    //   const yy = String(today.getFullYear()); // Get last two digits of the year
+                    setconsoleMessage(activationCode)
+                    // =========================
+                    let events = localStorage.getItem("lastSubmission") ?? JSON.stringify([]);
 
-                    //   const formattedDate = `${yy}-${mm}-${dd}`;
-                    //   const eventExists = eventsArray.some((entry: { code: string; date: string }) =>
-                    //     entry.code === activationCode &&
-                    //     new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
-                    //   );
+                    // If events is null, initialize an empty array, otherwise parse the existing data
+                    if (events === null) {
+                      events = JSON.stringify([]); // Initialize an empty array if no events exist
+                    }
 
-                    //   console.log('eventExists', eventExists)
-                    //   setconsoleMessage(eventExists)
-
-                    //   if (!eventExists) {
-
-                    //     // toast.success("Event code is valid")
-                    //     console.log("New event added to localStorage.");
-
-                    //     validateEventCode()
-
-                    //   } else {
-                    //     setconsoleMessage("This event already exists in localStorage.")
-
-                    //     console.log("This event already exists in localStorage.", localStorage.getItem("events"));
-                    //     toast.error("You have already submitted an event for this day.")
-                    //   }
-                    //   // =========================
+                    const eventsArray = JSON.parse(events); // Now it's safe to parse
+                    console.log("events:: ", events, eventsArray)
 
 
+                    // Check if the event already exists based on eventCode
+                    // const eventExists = eventsArray.some((event: EventDetails) => {
+                    //   console.log("eventsArray.some:: ", activationCode, event.eventCode)
 
-                    // } else {
-                    //   setShowError(true)
-                    // }
-                  // }}
-                  disabled={isActivated}
-                >
-                  Validate
-                </button>
-              </form>
+                    //   event.eventCode === activationCode
+                    // });
+                    const today = new Date();
+                    const dd = String(today.getDate()).padStart(2, '0');
+                    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+                    const yy = String(today.getFullYear()); // Get last two digits of the year
+
+                    const formattedDate = `${yy}-${mm}-${dd}`;
+                    const eventExists = eventsArray.some((entry: { code: string; date: string }) =>
+                      entry.code === activationCode &&
+                      new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
+                    );
+
+                    console.log('eventExists', eventExists)
+                    setconsoleMessage(eventExists)
+
+                    if (!eventExists) {
+
+                      // toast.success("Event code is valid")
+                      console.log("New event added to localStorage.");
+
+                      validateEventCode()
+
+                    } else {
+                      setconsoleMessage("This event already exists in localStorage.")
+
+                      console.log("This event already exists in localStorage.", localStorage.getItem("events"));
+                      toast.error("You have already submitted an event for this day.")
+                    }
+                    // =========================
+
+
+
+                  } else {
+                    setShowError(true)
+                  }
+                }}
+                disabled={isActivated}
+              >
+                Validate
+              </button>
             </div>
 
 
             {showError && (
               <p className="text-sm text-red-500 mt-1 ml-2">Event code is required</p>
             )}
-            {(
-              <p className="text-sm text-red-500 mt-1 ml-2">{consoleMessage}</p>
-            )}
+
           </div>
+
           <form onSubmit={handleSubmit} className="space-y-2">
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
               <svg className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
