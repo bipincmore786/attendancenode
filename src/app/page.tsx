@@ -700,7 +700,7 @@ export default function HomePage() {
               <button
                 type="button"
                 className="text-sm px-4 rounded-md
-                bg-orange-600 text-white rounded-lg hover:bg-green-700 transition 
+                bg-orange-600 text-white rounded-lg 
                 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-orange-600"
                 style={{ height: '48px', minWidth: '80px' }}
                 onClick={() => {
