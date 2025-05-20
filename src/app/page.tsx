@@ -183,7 +183,7 @@ export default function HomePage() {
     console.log(payload)
     try {
       const result = await sendActivationCode(payload);
-
+      setconsoleMessage('eventExists' + result.data[0].status)
       // result = {
       //   "data": [
       //     {
