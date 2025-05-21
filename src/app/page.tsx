@@ -67,65 +67,70 @@ export default function HomePage() {
     } else {
       // Save the current date as the last submission date
       // localStorage.setItem("lastSubmissionDate", formattedDate + "");
-      const newSubmission = {
-        code: activationCode,
-        date: formattedDate,
-        ipaddress: visitorId
-      };
-      // Get existing submissions
-      const existingData = localStorage.getItem("lastSubmission");
-      let submissions = [];
-      if (existingData) {
-        submissions = JSON.parse(existingData);
-      }
-      // Add new submission
-      submissions.push(newSubmission);
-      // Save back to localStorage
-      localStorage.setItem("lastSubmission", JSON.stringify(submissions));
-      toast.success("Event Data submitted succesfully.")
-      // return
-    }
 
-    const existingId = localStorage.getItem(DEVICE_ID_KEY);
-    const existingActication = localStorage.getItem(activationCode);
-    console.log(location, existingId, existingActication)
-    setLoading(true); // Start loading
-    console.log(error)
-    if (!navigator.geolocation) {
-      toast.success('Geolocation is not supported by your browser.');
-      return;
+      // const newSubmission = {
+      //   code: activationCode,
+      //   date: formattedDate,
+      //   // ipaddress: visitorId
+      // };
+      // // Get existing submissions
+      // const existingData = localStorage.getItem("lastSubmission");
+      // let submissions = [];
+      // if (existingData) {
+      //   submissions = JSON.parse(existingData);
+      // }
+      // // Add new submission
+      // submissions.push(newSubmission);
+      // // Save back to localStorage
+      // localStorage.setItem("lastSubmission", JSON.stringify(submissions));
+
+
+      // toast.success("Event Data submitted succesfully.")
+      // return
+
+
+      const existingId = localStorage.getItem(DEVICE_ID_KEY);
+      const existingActication = localStorage.getItem(activationCode);
+      console.log(location, existingId, existingActication)
+      setLoading(true); // Start loading
+      console.log(error)
+      if (!navigator.geolocation) {
+        toast.success('Geolocation is not supported by your browser.');
+        return;
+      }
+      // const newId = uuidv4();
+      if (!location) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            // setToken(tokenValue);
+            setLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            });
+            const { latitude, longitude } = position.coords;
+            const locationName = await getLocationName(latitude, longitude);
+            setLocationName(locationName)
+            // setLoading(false);
+            sendRequest(formattedDate)
+          },
+          () => {
+            toast.error('Location permission denied. Cannot generate token.');
+            setLoading(false);
+          }
+        );
+      } else {
+        // setLoading(false);
+        sendRequest(formattedDate)
+      }
+      // localStorage.setItem(DEVICE_ID_KEY, newId);
+      localStorage.setItem("activationCode", activationCode);
+      // localStorage.setItem(DEVICE_ID_KEY, newId);
+      localStorage.setItem("activationCode", activationCode);
     }
-    // const newId = uuidv4();
-    if (!location) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          // setToken(tokenValue);
-          setLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-          const { latitude, longitude } = position.coords;
-          const locationName = await getLocationName(latitude, longitude);
-          setLocationName(locationName)
-          // setLoading(false);
-          sendRequest()
-        },
-        () => {
-          toast.error('Location permission denied. Cannot generate token.');
-          setLoading(false);
-        }
-      );
-    } else {
-      // setLoading(false);
-      sendRequest()
-    }
-    // localStorage.setItem(DEVICE_ID_KEY, newId);
-    localStorage.setItem("activationCode", activationCode);
-    // localStorage.setItem(DEVICE_ID_KEY, newId);
-    localStorage.setItem("activationCode", activationCode);
   };
 
-  const sendRequest = async () => {
+  const sendRequest = async (formattedDate: string) => {
+
     const payload = {
       apikey: "SUBMIT",
       eventcode: activationCode,
@@ -137,7 +142,26 @@ export default function HomePage() {
       geolon: location?.longitude ?? 0
     };
 
-    console.log(payload)
+    console.log("payload", payload)
+    const isValidPayload = Object.entries(payload).every(([key, value]) => {
+      // Allow geolat and geolon to be 0, but not undefined or null
+      if (key === 'geolat' || key === 'geolon') {
+        return value !== undefined && value !== null;
+      }
+      return value !== undefined && value !== null && value !== '';
+    });
+
+    console.log("isValidPayload", isValidPayload)
+
+    if (!isValidPayload) {
+      console.log("Payload validation failed. Missing or invalid values:", payload);
+      toast.error("Required fields are missing or invalid.")
+      setLoading(false)
+      return
+    }
+
+    // console.log(payload)
+
     try {
       const result = await sendAttendanceData(payload);
       console.log('API Response:', result);
@@ -147,6 +171,23 @@ export default function HomePage() {
         return;
       } else if (result.data[0].status === "success") {
 
+        const newSubmission = {
+          code: activationCode,
+          date: formattedDate,
+          // ipaddress: visitorId
+        };
+        // Get existing submissions
+        const existingData = localStorage.getItem("lastSubmission");
+        let submissions = [];
+        if (existingData) {
+          submissions = JSON.parse(existingData);
+        }
+        // Add new submission
+        submissions.push(newSubmission);
+        // Save back to localStorage
+        localStorage.setItem("lastSubmission", JSON.stringify(submissions));
+
+        toast.success(result.data[0].message) //Your attendance has been marked successfully.
         setToken(result.data[0].token)
 
         setShowModal(true);
