@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 
 // const API_URL = 'https://dummyjson.com/c/378b-70b1-4c56-a5f2';
-const API_URL = 'https://dev.aparapi.co.in:8100/sap/bc/rest/rest_webevent?sap-client=400';// 'http://APAR-S4-Public-NLB-48e77eaa902d59f9.elb.ap-south-1.amazonaws.com:8020/sap/bc/rest/rest_webevent?sap-client=400'; //'https://10.52.2.46:44300/sap/bc/rest/rest_webevent?sap-client=400'; 
+const API_URL = '/api/rest_webevent'; // 'https://dev.aparapi.co.in:8100/sap/bc/rest/rest_webevent?sap-client=400';// 'http://APAR-S4-Public-NLB-48e77eaa902d59f9.elb.ap-south-1.amazonaws.com:8020/sap/bc/rest/rest_webevent?sap-client=400'; //'https://10.52.2.46:44300/sap/bc/rest/rest_webevent?sap-client=400'; 
 const USERNAME = 'rfccrm';
 const PASSWORD = 'Initial0@';
 
@@ -24,9 +24,9 @@ export const sendAttendanceData = async (data: {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Basic ' + btoa('rfccrm' + ':' + 'Initial0@'),
-        // 'Access-Control-Allow-Origin': '*',
-        // 'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
-        // 'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
+        'Access-Control-Allow-Headers': '*',
       },
     });
 
@@ -52,9 +52,9 @@ export const sendActivationCode = async (data: {
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Basic ' + btoa('rfccrm' + ':' + 'Initial0@'),
-        // 'Access-Control-Allow-Origin': '*',
-        // 'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
-        // 'Access-Control-Allow-Headers': '*',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'HEAD, GET, POST, OPTIONS, PUT, PATCH, DELETE',
+        'Access-Control-Allow-Headers': '*',
       },
     });
 
