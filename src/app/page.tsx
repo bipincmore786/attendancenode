@@ -1,15 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import { sendActivationCode, sendAttendanceData } from './lib/api';  //sendActivationCode
+import { sendActivationCode, sendAttendanceData } from './lib/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import crypto from 'crypto';
 
+/**
+ * HomePage Component - Main attendance registration form
+ * 
+ * This component provides a form for event attendance registration with:
+ * - Event code validation
+ * - User information collection
+ * - Geolocation tracking
+ * - Form submission with validation
+ * - Success modal with token display
+ */
 export default function HomePage() {
-
-  const DEVICE_ID_KEY = 'my_persistent_device_id_EVENT_1';
+  // State variables
   const [activationCode, setActivationCode] = useState("");
   const [userName, setUserName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -18,7 +25,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
-  const [visitorId, setVisitorId] = useState<string | null>(null);
+  // const [visitorId, setVisitorId] = useState<string | null>(null);
   const [locationName, setLocationName] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [isActivated, setIsActivated] = useState(false);
@@ -26,111 +33,82 @@ export default function HomePage() {
   const [startDatetime, setStartDatetime] = useState('');
   const [endDatetime, setEndDatetime] = useState('');
 
-  const getFingerprint = async () => {
-    try {
-      const res = await fetch('https://api.ipify.org?format=json');
-      const data = await res.json();
-      console.log("IP data", data)
-      setVisitorId(data.ip);
-    } catch (error) {
-      console.error('Fingerprint error:', error);
-      setVisitorId(null);
-    } finally {
-      // setLoadingDevice(false);
-    }
-    console.log("IP", visitorId)
-    return visitorId; // unique & consistent ID
-  };
+  /**
+   * Gets user's IP address as a fingerprint identifier
+   * @returns {Promise<string|null>} The visitor IP address or null if failed
+   */
+  // const getFingerprint = async () => {
+  //   try {
+  //     const res = await fetch('https://api.ipify.org?format=json');
+  //     const data = await res.json();
+  //     setVisitorId(data.ip);
+  //   } catch (error) {
+  //     console.error('Fingerprint error:', error);
+  //     setVisitorId(null);
+  //   }
+  //   return visitorId;
+  // };
 
+  /**
+   * Handles form submission
+   * @param {React.FormEvent} e - Form event
+   */
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const today = new Date();
     const dd = String(today.getDate()).padStart(2, '0');
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const yy = String(today.getFullYear()); // Get last two digits of the year
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const yy = String(today.getFullYear());
     const formattedDate = `${yy}-${mm}-${dd}`;
 
-    // Check if the event dat e is in the future
+    // Validation checks
     if (hasUserSubmittedForTheDay(formattedDate, activationCode)) {
-      console.log("You have already submitted an event for this day.");
       toast.error("You have already submitted an event for this day.")
-      return
-
+      return;
     } else if (isEventInThePast(endDatetime)) {
-      console.log("The event date is in past.");
       toast.error("The event date is in past.")
-      return
+      return;
     } else if (isEventInTheFuture(startDatetime)) {
-      console.log("The event date is in the future.");
       toast.error("The event date is in the future.")
-      return
+      return;
     } else {
-      // Save the current date as the last submission date
-      // localStorage.setItem("lastSubmissionDate", formattedDate + "");
-
-      // const newSubmission = {
-      //   code: activationCode,
-      //   date: formattedDate,
-      //   // ipaddress: visitorId
-      // };
-      // // Get existing submissions
-      // const existingData = localStorage.getItem("lastSubmission");
-      // let submissions = [];
-      // if (existingData) {
-      //   submissions = JSON.parse(existingData);
-      // }
-      // // Add new submission
-      // submissions.push(newSubmission);
-      // // Save back to localStorage
-      // localStorage.setItem("lastSubmission", JSON.stringify(submissions));
-
-
-      // toast.success("Event Data submitted succesfully.")
-      // return
-
-
-      const existingId = localStorage.getItem(DEVICE_ID_KEY);
-      const existingActication = localStorage.getItem(activationCode);
-      console.log(location, existingId, existingActication)
-      setLoading(true); // Start loading
-      console.log(error)
+      setLoading(true);
+      
       if (!navigator.geolocation) {
         toast.success('Geolocation is not supported by your browser.');
         return;
       }
-      // const newId = uuidv4();
+
       if (!location) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
-            // setToken(tokenValue);
             setLocation({
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
             });
             const { latitude, longitude } = position.coords;
             const locationName = await getLocationName(latitude, longitude);
-            setLocationName(locationName)
-            // setLoading(false);
-            sendRequest(formattedDate)
+            setLocationName(locationName);
+            sendRequest(formattedDate);
           },
           () => {
-            toast.error('Location permission denied. Cannot generate token.');
+            toast.error('Location permission denied.');
             setLoading(false);
           }
         );
       } else {
-        // setLoading(false);
-        sendRequest(formattedDate)
+        sendRequest(formattedDate);
       }
-      // localStorage.setItem(DEVICE_ID_KEY, newId);
-      localStorage.setItem("activationCode", activationCode);
-      // localStorage.setItem(DEVICE_ID_KEY, newId);
+      
       localStorage.setItem("activationCode", activationCode);
     }
   };
 
+  /**
+   * Sends attendance data to the server
+   * @param {string} formattedDate - Current date in YYYY-MM-DD format
+   */
   const sendRequest = async (formattedDate: string) => {
-
     const payload = {
       apikey: "SUBMIT",
       eventcode: activationCode,
@@ -142,199 +120,169 @@ export default function HomePage() {
       geolon: location?.longitude ?? 0
     };
 
-    console.log("payload", payload)
+    // Validate payload
     const isValidPayload = Object.entries(payload).every(([key, value]) => {
-      // Allow geolat and geolon to be 0, but not undefined or null
       if (key === 'geolat' || key === 'geolon') {
         return value !== undefined && value !== null;
       }
       return value !== undefined && value !== null && value !== '';
     });
 
-    console.log("isValidPayload", isValidPayload)
-
     if (!isValidPayload) {
-      console.log("Payload validation failed. Missing or invalid values:", payload);
-      toast.error("Required fields are missing or invalid.")
-      setLoading(false)
-      return
+      toast.error("Required fields are missing or invalid.");
+      setLoading(false);
+      return;
     }
-
-    // console.log(payload)
 
     try {
       const result = await sendAttendanceData(payload);
-      console.log('API Response:', result);
 
       if (result.data[0].status === "fail") {
-        toast.error(result.data[0].message)
+        toast.error(result.data[0].message);
         return;
       } else if (result.data[0].status === "success") {
-
+        // Store submission in localStorage
         const newSubmission = {
           code: activationCode,
           date: formattedDate,
-          // ipaddress: visitorId
         };
-        // Get existing submissions
+        
         const existingData = localStorage.getItem("lastSubmission");
         let submissions = [];
         if (existingData) {
           submissions = JSON.parse(existingData);
         }
-        // Add new submission
+        
         submissions.push(newSubmission);
-        // Save back to localStorage
         localStorage.setItem("lastSubmission", JSON.stringify(submissions));
 
-        toast.success(result.data[0].message) //Your attendance has been marked successfully.
-        setToken(result.data[0].token)
-
+        toast.success(result.data[0].message);
+        setToken(result.data[0].token);
         setShowModal(true);
-        setActivationCode('')
-        setUserName('')
-        setPhoneNumber('')
-        setOrgName('')
-        setLocation(null)
-        setLocationName('')
+        
+        // Reset form fields
+        setActivationCode('');
+        setUserName('');
+        setPhoneNumber('');
+        setOrgName('');
+        setLocation(null);
+        setLocationName('');
       }
-      setLoading(false)
+      setLoading(false);
     } catch (error) {
-      setLoading(false)
-
-      console.log(error)
+      setLoading(false);
+      console.log(error);
     }
-  }
+  };
 
+  /**
+   * Validates the event code with the server
+   */
   const validateEventCode = async () => {
     const payload = { "apikey": "VALIDATE", "eventcode": activationCode };
-
-    console.log(payload)
+    
     try {
       const result = await sendActivationCode(payload);
-
-      // result = {
-      //   "data": [
-      //     {
-      //       "status": "success",
-      //       "message": "Invalid Event Code",
-      //       startDatetime: "2025-05-20T09:00:00",
-      //       endDatetime: "2025-05-20T18:00:00"
-      //     }
-      //   ]
-      // }
-
-      setLoading(false)
+      setLoading(false);
+      
       if (result.data[0].status === "fail") {
-        toast.error(result.data[0].message)
-        return
+        toast.error(result.data[0].message);
+        return;
       } else {
         setIsActivated(true);
-        console.log("result:: ", result)
-        console.log(result.data[0].startDatetime, result.data[0].endDatetime)
-        setStartDatetime(result.data[0].startDatetime)
-        setEndDatetime(result.data[0].endDatetime)
-
-        toast.success("Event code is valid")
-        console.log("New event added to localStorage.");
-
+        setStartDatetime(result.data[0].startDatetime);
+        setEndDatetime(result.data[0].endDatetime);
+        toast.success("Event code is valid");
+        
+        // Store event in localStorage
         let events = localStorage.getItem("events") ?? "[]";
-
-        // If events is null, initialize an empty array, otherwise parse the existing data
         if (events === null) {
-          events = JSON.stringify([]); // Initialize an empty array if no events exist
+          events = JSON.stringify([]);
         }
 
         const eventsArray = JSON.parse(events);
-        // If event doesn't exist, add it
         eventsArray.push(result);
-        // Save the updated array back to localStorage
         localStorage.setItem("events", JSON.stringify(eventsArray));
-
       }
-
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
+  /**
+   * Gets location name from coordinates using Nominatim API
+   * @param {number} latitude - Latitude coordinate
+   * @param {number} longitude - Longitude coordinate
+   * @returns {Promise<string>} Location name as string
+   */
   const getLocationName = async (latitude: number, longitude: number): Promise<string> => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
       );
       const data = await response.json();
-      console.log("locationData:: ", data)
       return data.display_name || 'Location not found';
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return 'Failed to fetch location name';
     }
   };
 
-  // Function to check if the event date is in Past
+  /**
+   * Checks if event date is in the past
+   * @param {string} eventDate - Event date string
+   * @returns {boolean} True if event is in the past
+   */
   const isEventInThePast = (eventDate: string) => {
     const today = new Date();
     const eventDateObj = new Date(eventDate);
-    // today.setHours(0, 0, 0, 0);
-    // eventDateObj.setHours(0, 0, 0, 0);
-    console.log("eventDateObj < today", eventDate, eventDateObj)
-    console.log(eventDateObj)
-    console.log(today)
-    console.log(eventDateObj < today)
     return eventDateObj < today;
   };
 
-  // Function to check if the event date is in the future
+  /**
+   * Checks if event date is in the future
+   * @param {string} eventDate - Event date string
+   * @returns {boolean} True if event is in the future
+   */
   const isEventInTheFuture = (eventDate: string) => {
     const today = new Date();
     const eventDateObj = new Date(eventDate);
-    // today.setHours(0, 0, 0, 0);
-    // eventDateObj.setHours(0, 0, 0, 0);
-    console.log("eventDateObj > today")
-    console.log(eventDateObj)
-    console.log(today)
-    console.log(eventDateObj > today)
     return eventDateObj > today;
   };
 
-  // Function to check if the user has already submitted the event for the day
+  /**
+   * Checks if user has already submitted for the current day
+   * @param {string} formattedDate - Current date in YYYY-MM-DD format
+   * @param {string} eventCode - Event code
+   * @returns {boolean} True if user has already submitted
+   */
   const hasUserSubmittedForTheDay = (formattedDate: string, eventCode: string): boolean => {
     const submissionDataRaw = localStorage.getItem("lastSubmission");
 
     if (!submissionDataRaw) {
-      console.log("No previous submission found.");
       return false;
     }
+    
     const submissionData = JSON.parse(submissionDataRaw);
-    // Check if any submission matches both the date and the event code
     const alreadySubmitted = submissionData.some((entry: { code: string; date: string; ipaddress: string }) =>
       entry.code === eventCode &&
       new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
     );
 
-    if (alreadySubmitted) {
-      console.log("User has already submitted for this event on this date.");
-      return true;
-    }
-
-    console.log("No matching submission found.");
-    return false;
+    return alreadySubmitted;
   };
 
-
+  // Initialize component
   useEffect(() => {
-    // generateTokenNew("Bipin", "9967504677")
-    const deviceId = uuidv4();
-
-    getFingerprint();
-    console.log("deviceId:: ", deviceId)
-    // console.log("visitorId:: 1 ", visitorId)
-    console.log(navigator.userAgent);
+    // getFingerprint();
+    
     if (!navigator.geolocation) {
       setError('Geolocation is not supported by your browser.');
+      console.log(error);
       return;
     }
+    
+    // Get current location
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         setLocation({
@@ -342,7 +290,7 @@ export default function HomePage() {
           longitude: position.coords.longitude,
         });
         const locationName = await getLocationName(position.coords.latitude, position.coords.longitude);
-        setLocationName(locationName)
+        setLocationName(locationName);
       },
       (error) => {
         switch (error.code) {
@@ -355,9 +303,6 @@ export default function HomePage() {
           case error.TIMEOUT:
             toast.error('Location request timed out.');
             break;
-          // case error.UNKNOWN_ERROR:
-          //   toast.error('An unknown location error occurred.');
-          //   break;
         }
       },
       {
@@ -368,9 +313,14 @@ export default function HomePage() {
     );
   }, []);
 
-
+  /**
+   * TokenDisplay Component - Displays the registration token with copy functionality
+   * @param {Object} props - Component props
+   * @param {string} props.token - The token to display
+   */
   const TokenDisplay = ({ token }: { token: string }) => {
     const [copied, setCopied] = useState(false);
+    
     const handleCopy = () => {
       navigator.clipboard.writeText(token);
       setCopied(true);
@@ -378,7 +328,7 @@ export default function HomePage() {
     };
 
     return (
-      <div className="flex flex-wrap  gap-2 mt-4 text-center sm:text-left">
+      <div className="flex flex-wrap gap-2 mt-4 text-center sm:text-left">
         <span className="text-base sm:text-2xl font-bold text-orange-600">
           Your registration token is: <span className="break-all text-orange-800">{token}</span>
         </span>
@@ -418,15 +368,18 @@ export default function HomePage() {
     );
   };
 
+  // Main component render
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-white">
+      {/* Toast notifications container */}
       <div>
         <ToastContainer
-          className="p-6 "
+          className="p-6"
           position="bottom-center"
           autoClose={3000}
         />
       </div>
+      
       {/* Mobile-only Top Welcome Section */}
       <div className="lg:hidden flex flex-col items-center text-center p-6 bg-white">
         <img
@@ -435,17 +388,20 @@ export default function HomePage() {
           className="h-25 mb-3"
         />
       </div>
+      
       {/* Left Panel for Web View */}
       <div className="hidden lg:flex w-1/2 bg-white text-white p-10 flex-col justify-center rounded-r-[0px]">
         <div className="flex items-center space-x-4 justify-center text-center">
-          <div className="bp-2 rounded-full ">
-            <img src="/aparlogo_transparent.png"
+          <div className="bp-2 rounded-full">
+            <img 
+              src="/aparlogo_transparent.png"
               alt="Company Logo"
               className="h-35 mb-4"
             />
           </div>
         </div>
       </div>
+      
       {/* Right Panel for Form */}
       <div className="flex-1 flex justify-center items-center p-8 bg-[#fecda5] rounded-t-[30px] lg:rounded-none lg:rounded-l-[50px]">
         <div className="w-full max-w-md space-y-6">
@@ -453,6 +409,8 @@ export default function HomePage() {
           <p className="text-center text-gray-500 mb-4">
             Enter your valid information to mark attendance
           </p>
+          
+          {/* Event Code Input */}
           <div className="w-full max-w-md">
             <div className="w-full flex flex-row gap-2 items-center bg-white shadow-md rounded-lg max-w-md">
               <div className="flex items-center bg-white rounded-md py-3 w-full">
@@ -475,11 +433,10 @@ export default function HomePage() {
                 <input
                   type="text"
                   placeholder="Event Code"
-                  // className="w-full outline-none text-sm text-gray-700 placeholder-gray-400"
                   className={`w-full outline-none text-sm ${!isActivated ? 'text-black' : 'text-gray-400'} placeholder-gray-400`}
                   value={activationCode}
                   onChange={(e) => {
-                    setShowError(false)
+                    setShowError(false);
                     setActivationCode(e.target.value.toLocaleUpperCase());
                     if (!e.target.value.trim()) {
                       setIsActivated(false);
@@ -492,56 +449,37 @@ export default function HomePage() {
               </div>
               <button
                 type="button"
-                className="text-sm px-4 rounded-md
-                bg-orange-600 text-white rounded-lg hover:bg-green-700 transition 
-                disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-orange-600"
+                className="text-sm px-4 rounded-md bg-orange-600 text-white rounded-lg hover:bg-green-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-orange-600"
                 style={{ height: '48px', minWidth: '80px' }}
                 onClick={() => {
                   if (activationCode.trim()) {
-                    setLoading(true)
-                    // =========================
+                    setLoading(true);
                     let events = localStorage.getItem("lastSubmission") ?? JSON.stringify([]);
 
-                    // If events is null, initialize an empty array, otherwise parse the existing data
                     if (events === null) {
-                      events = JSON.stringify([]); // Initialize an empty array if no events exist
+                      events = JSON.stringify([]);
                     }
 
-                    const eventsArray = JSON.parse(events); // Now it's safe to parse
-                    console.log("events:: ", events, eventsArray)
-                    // Check if the event already exists based on eventCode
-                    // const eventExists = eventsArray.some((event: EventDetails) => {
-                    //   console.log("eventsArray.some:: ", activationCode, event.eventCode)
-                    //   event.eventCode === activationCode
-                    // });
+                    const eventsArray = JSON.parse(events);
                     const today = new Date();
                     const dd = String(today.getDate()).padStart(2, '0');
-                    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-                    const yy = String(today.getFullYear()); // Get last two digits of the year
-
+                    const mm = String(today.getMonth() + 1).padStart(2, '0');
+                    const yy = String(today.getFullYear());
                     const formattedDate = `${yy}-${mm}-${dd}`;
+                    
                     const eventExists = eventsArray.some((entry: { code: string; date: string }) =>
                       entry.code === activationCode &&
                       new Date(entry.date).toDateString() === new Date(formattedDate).toDateString()
                     );
 
-                    console.log('eventExists', eventExists)
                     if (!eventExists) {
-
-                      // toast.success("Event code is valid")
-                      console.log("New event added to localStorage.");
-
-                      validateEventCode()
-
+                      validateEventCode();
                     } else {
-                      setLoading(false)
-
-                      console.log("This event already exists in localStorage.", localStorage.getItem("events"));
-                      toast.error("You have already submitted an event for this day.")
+                      setLoading(false);
+                      toast.error("You have already submitted an event for this day.");
                     }
-                    // =========================
                   } else {
-                    setShowError(true)
+                    setShowError(true);
                   }
                 }}
                 disabled={loading || isActivated}
@@ -553,7 +491,10 @@ export default function HomePage() {
               <p className="text-sm text-red-500 mt-1 ml-2">Event code is required</p>
             )}
           </div>
+          
+          {/* Main Form */}
           <form onSubmit={handleSubmit} className="space-y-2">
+            {/* Visitor Name Input */}
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
               <svg className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 10a4 4 0 100-8 4 4 0 000 8zM2 18a8 8 0 0116 0H2z" />
@@ -569,6 +510,7 @@ export default function HomePage() {
               />
             </div>
 
+            {/* Phone Number Input */}
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
               <svg
                 className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`}
@@ -589,11 +531,10 @@ export default function HomePage() {
                 placeholder="Mobile No."
                 className="flex-1 outline-none text-[#000] disabled:opacity-50 disabled:cursor-not-allowed"
                 inputMode="numeric"
-                // pattern="[0-9]*"
                 value={phoneNumber}
                 onChange={(e) => {
                   const onlyNums = e.target.value.replace(/[^0-9]/g, '');
-                  const allSameDigits = /^(\d)\1{9}$/; // matches repeated digits
+                  const allSameDigits = /^(\d)\1{9}$/;
                   const repeatingTwoDigits = /^(\d\d)\1{4}$/;
                   if (allSameDigits.test(onlyNums)) {
                     setError('Mobile number cannot have all digits the same.');
@@ -611,7 +552,8 @@ export default function HomePage() {
                 pattern="^[6-9]\d{9}$"
               />
             </div>
-            {/* Org/Shop Name */}
+            
+            {/* Organization Name Input */}
             <div className="flex items-center bg-white border rounded-lg p-3 disabled:opacity-50 disabled:cursor-not-allowed focus-within:ring-2 focus-within:ring-red-500">
               <svg className={`w-5 h-5 mr-3 ${isActivated ? 'text-black' : 'text-gray-400'}`} fill="currentColor" viewBox="0 0 20 20">
                 <path d="M2 3h16v2H2V3zm1 4h14v10H3V7zm2 2v2h2V9H5zm4 0v2h2V9H9z" />
@@ -626,6 +568,7 @@ export default function HomePage() {
                 disabled={!isActivated}
               />
             </div>
+            
             {/* Submit Button */}
             <button
               type="submit"
@@ -635,17 +578,21 @@ export default function HomePage() {
                 phoneNumber.trim().length !== 10 ||
                 orgName.trim() === ''}
               className="w-full bg-orange-600 text-white py-3 rounded-lg font-semibold 
-    hover:bg-red-700 
-    disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
+                hover:bg-red-700 
+                disabled:bg-gray-300 disabled:cursor-not-allowed disabled:hover:bg-gray-300"
             >
               {loading ? 'Please wait...' : 'Submit'}
             </button>
           </form>
+          
+          {/* Loading Spinner */}
           {loading && (
             <div className="flex justify-center my-4">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-600 border-t-transparent shadow-lg"></div>
             </div>
           )}
+          
+          {/* Location Information */}
           {locationName && (
             <div className="border border-gray-300 rounded-xl p-4 mt-0 bg-gray-100 shadow-sm space-y-2">
               <p className="text-sm text-black font-semibold justify-center text-center text-[16px] underline">Live Location</p>
@@ -660,12 +607,14 @@ export default function HomePage() {
                   <span className="ml-2 text-orange-700">Lng {location.longitude.toFixed(5)}</span>
                 </p>
               )}
-              {(
-                <p className='text-l text-black' > IP Address: <span className="text-2xl text-red-500 justify-center text-center">{visitorId}</span></p>
-              )}
+              {/* {(
+                <p className='text-l text-black'>IP Address: <span className="text-2xl text-red-500 justify-center text-center">{visitorId}</span></p>
+              )} */}
             </div>
           )}
         </div>
+        
+        {/* Success Modal */}
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center z-60 bg-black/40 backdrop-blur-sm">
             <div className="bg-white p-6 rounded-lg shadow-2xl max-w-xl w-full transform transition-all duration-300 scale-95 opacity-0 animate-fade-in">
@@ -695,10 +644,9 @@ export default function HomePage() {
               )}
               <button
                 onClick={() => {
-                  setShowModal(false)
+                  setShowModal(false);
                   setIsActivated(false);
-                  setToken('')
-
+                  setToken('');
                 }}
                 className="mt-4 w-full bg-orange-600 text-white py-2 rounded-md hover:bg-green-700 transition duration-200"
               >
